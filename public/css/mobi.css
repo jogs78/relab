@@ -1,0 +1,28 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: 'open sans';
+    background: rgba(237, 248, 251, .9);
+}
+
+img{
+    vertical-align: top;
+    border-radius: 10px;
+}
+
+/*--- Bubble effect ---*/
+.bubble {
+    transform: scale(0);
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background-color: #C00;
+    transition: all 5s;
+}
+.bubble.animate {
+    transform: scale(1);
+}
