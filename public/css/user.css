@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: 'Open Sans', sans-serif;
+    background: rgba(237, 248, 251, .9);
+}
+
+img{
+    vertical-align: top;
+    border-radius: 10px;
+}
+
+.box{
+  width: 300px;
+  height: 50px;
+}
+
+.container-1{
+  width: 300px;
+}
+
+.container-1 input#search{
+  width: 300px;
+  height: 50px;
+  background: #2b303b;
+  border: none;
+  font-size: 10pt;
+  float: left;
+  color: #63717f;
+  padding-left: 45px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.container-1 input#search::-webkit-input-placeholder {
+   color: #65737e;
+}
+ 
+.container-1 input#search:-moz-placeholder { /* Firefox 18- */
+   color: #65737e;  
+}
+ 
+.container-1 input#search::-moz-placeholder {  /* Firefox 19+ */
+   color: #65737e;  
+}
+ 
+.container-1 input#search:-ms-input-placeholder {  
+   color: #65737e;  
+}
+
+.container-1 .icon{
+  position: absolute;
+  top: 50%;
+  margin-left: 17px;
+  margin-top: 17px;
+  z-index: 1;
+  color: #4f5b66;
+}
+
+/*.contenido-principal{
+    width: 100%;
+    height: 800px;
+}*/
+
+/*--- Bubble effect ---*/
+/*.bubble {
+    transform: scale(0);
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background-color: #C00;
+    transition: all 5s;
+}
+.bubble.animate {
+    transform: scale(1);
+}*/

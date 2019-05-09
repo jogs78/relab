@@ -11,13 +11,13 @@ $(function(){
 		}
 	});
 
-	let usuario = $("#usuario").offset().top,
+	let //usuario = $("#usuario").offset().top,
 		sala = $("#sala").offset().top,
 		mobi = $("#trabajo").offset().top,
 		revision = $("#contacto").offset().top;
 
 	window.addEventListener("resize", function(){
-		let usuario = $("#usuario").offset().top,
+		let //usuario = $("#usuario").offset().top,
 			sala = $("#sala").offset().top,
 			mobi = $("#trabajo").offset().top,
 			revision = $("#contacto").offset().top;

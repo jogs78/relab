@@ -9,10 +9,10 @@
 
     <title>{{ config('app.name', 'Relab') }}</title>
 
-    
     @yield('styles')
-    
+
     @yield('links')
+    
 
 </head>
 <body class="hidden">
@@ -24,7 +24,6 @@
         
         @yield('content')
 
-        <footer> ITTG ISC ©2018~2019 – Todos los derechos reservados. Desarrollador: Ing. Cristian Ruiz</footer>
 
     @yield('scripts')
 </body>

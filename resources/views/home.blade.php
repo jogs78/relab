@@ -5,12 +5,10 @@
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/ventana_emergente.css">
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ URL::asset('https://use.fontawesome.com/releases/v5.7.2/css/all.css"') }}" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-    <script src="js/ventana_emergente.js"></script>
-    <script src="js/filtro.js"></script>
+    <script src="{{ URL::asset('https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js') }}"></script>
+   
 
 @endsection
 
@@ -25,10 +23,25 @@
                     <img src="images/logo_ittg.png" alt="">
                 </div>
                 <div class="enlaces" id="enlaces">
-                    <a href="{{ url('/users') }}" id="enlace-inicio" class="btn-header">Usuarios</a>
-                    <a href="#" id="enlace-salas" class="btn-header">Salas o Laboratorios</a>
-                    <a href="#" id="enlace-mobi" class="btn-header">Revisiones</a>
-                    <a href="#" id="enlace-revision" class="btn-header">Contacto</a>
+                    @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Administrador')
+                        
+                        <a href="{{ url('/users') }}" class="btn-header">Usuarios</a>
+                        <a href="{{ route('lugares.index') }}" class="btn-header">Lugares</a>
+                        <a href="#" id="enlace-salas" class="btn-header">Mobiliario y Equipo</a>
+                        <a href="#" id="enlace-mobi" class="btn-header">Revisiones</a>
+                        
+                    @endif
+                    @if(Auth::user()->tipo_usuario == 'Revisor' || Auth::user()->tipo_usuario == 'Encargado')
+                        <a href="#" class="btn-header">Lugares</a>
+                        <a href="#" id="enlace-salas" class="btn-header">Mobiliario y Equipo</a>
+                        <a href="#" id="enlace-mobi" class="btn-header">Revisiones</a>
+                        @endif
+                        @if(Auth::user()->tipo_usuario == 'Prestador' || Auth::user()->tipo_usuario == 'Responsable' || Auth::user()->tipo_usuario == 'Reporteador')
+                        <a href="#" id="enlace-mobi" class="btn-header">Revisiones</a>
+                        @endif
+
+                        <a href="#" id="enlace-revision" class="btn-header">Contacto</a>
+                    
 
                     
                     <a class="dropdown-item" href="{{ route('logout') }}"
@@ -55,14 +68,11 @@
 
             </div>
                    
-                
         </nav>
-
-
         
         <div class="textos">
             <h1>Hola {{ Auth::user()->nombre }} !!</h1>
-            <h2>Bienvenido al sistema de control y rastreo de revisiones así como de mobiliario y equipo. </h2>
+            <h2>Bienvenido al sistema de control y rastreo de revisiones como {{Auth::user()->tipo_usuario}} </h2>
         </div>
 
     </header>
@@ -98,148 +108,62 @@
             </div>
         @endif
 
+{{-- Here I verify what kind of user I started session and I assign what options you can see
+ --}}
+@if(Auth::user()->tipo_usuario != 'Prestador' )
+ @if(Auth::user()->tipo_usuario != 'Responsable')
+ @if(Auth::user()->tipo_usuario != 'Reporteador')
+
         <section class="team contenedor" id="sala">
 
-            <h3>Salas</h3>
+            <h3>Mobiliario y Equipo</h3>
             <p class="after">Los lugares más populares</p>
-
             <div class="card">
-                <div class="content-card">
+
+{{-- Here I go through all the registered places and fill the view dynamically --}}
+            @foreach($lugares as $lugar)
+            <div class="content-card">
                     <div class="people">
-                        <a href="{{ url('/mobi') }}"><img src="images/lab_computo.jpg" alt=""></a>
+                        <a href="{{ route('mobis.show', $lugar->id) }}"><img src="images/lab_computo.jpg" alt=""></a>
                     </div>
                     <div class="texto-team">
-                        <h4>Lcom1</h4>
+                        <h4>{{ $lugar->nombre }}</h4>
                         <p></p>
                     </div>
                 </div>
-
-                <div class="content-card">
-                    <div class="people">
-                        <a href="#"><img src="images/lab_computo.jpg" alt=""></a>
-                    </div>
-                    <div class="texto-team">
-                        <h4>Lcom2</h4>
-                        <p></p>
-                    </div>
-                </div>
-
-                <div class="content-card">
-                    <div class="people">
-                        <a href="#"><img src="images/lab_computo.jpg" alt=""></a>
-                    </div>
-                    <div class="texto-team">
-                        <h4>Lcom3</h4>
-                        <p></p>
-                    </div>
-                </div>
-
-
-            <button class="btn-choosesala" id="btnChoose">Elegir otra</button>
-
-            <div class="oscurecer" id="oscurecer">
+            @endforeach
             
-    </div>
-    <div class="registrar" id="registrar">
-        <div class="cerrarRegistro" id="cerrarRegistro">
-            x
-        </div>
-        <h1>Registro</h1>
-        <form action="" method="get" accept-charset="utf-8">
-            <input type="text" name="nombre" placeholder="Nombre...">
-            <input type="text" name="apellido_pat" placeholder="Apellido Paterno...">
-            <input type="text" name="apellido_mat" placeholder="Apellido Materno...">
-            <input type="date" name="fecha_nac">
-            <input type="text" name="email" placeholder="Correo...">
-            <input type="text" name="pass" placeholder="Contraseña...">
-            <input type="button" value="Registrar" name="crear">
-        </form>
-    </div>
-
-            @yield('ventana_emergente')
-
-        </section>
-
-        <!--<section class="about" id="sala">
-
-            <div class="contenedor">
-                <h3>Mobiliario y Equipo</h3>
-                <p class="after">Todo acerca del mobiliario y equipo</p>
-
-                <div class="servicios">
-
-                    <div class="caja-servicios">
-                        <img src="icons/like.png" alt="">
-                        <h4>Creativos y Asombrosos</h4>
-                        <p>Lorem ipsum dolor sit amet, consectetur.</p>
-                    </div>
-
-                    <div class="caja-servicios">
-                        <img src="icons/placeholder.png" alt="">
-                        <h4>Creativos y Asombrosos</h4>
-                        <p>Lorem ipsum dolor sit amet, consectetur.</p>
-                    </div>
-
-                    <div class="caja-servicios">
-                        <img src="icons/wifi.png" alt="">
-                        <h4>Creativos y Asombrosos</h4>
-                        <p>Lorem ipsum dolor sit amet, consectetur.</p>
-                    </div>
-
-                </div>
-
-            </div>
-            
-        </section>-->
+@endif
+@endif
+@endif
 
         <section class="work contenedor" id="trabajo">
 
             <h3>Revisiones</h3>
             <p class="after">Revisiones de todas las salas y/o laboratorios del edificio de sistemas del ITTG.</p>
 
-            <div class="botones-work">
-                <ul>
-                    <li class="filter" data-nombre="todos">Todos</li>
-                    <li class="filter" data-nombre="diseño">Últimas</li>
-                    <li class="filter" data-nombre="programacion">Faltantes</li>
-                    <li class="filter" data-nombre="marketing">Más vistas</li>
-                </ul>
-            </div>
-
+{{-- Here I go through all the registered reviews and fill the view dynamically --}}
             <div class="galeria-work">
-
+                @foreach($lugares as $lugar)
                 <div class="cont-work programacion">
                     <div class="img-work">
-                        <img src="images/security.jpeg" alt="">
+                        <a href="/revisiones/{{ $lugar->id }}"><img src="images/security.jpeg" alt=""></a>
                     </div>
                     <div class="textos-work">
-                        <h4>Programación</h4>
+                        <h4>{{ $lugar->nombre }}</h4>
                     </div>
                 </div>
-
-                <div class="cont-work diseño">
-                    <div class="img-work">
-                        <img src="images/network.jpg" alt="">
-                    </div>
-                    <div class="textos-work">
-                        <h4>Diseño</h4>
-                    </div>
-                </div>
-
-                <div class="cont-work marketing">
-                    <div class="img-work">
-                        <img src="images/lineas.png" alt="">
-                    </div>
-                    <div class="textos-work">
-                        <h4>Marketing</h4>
-                    </div>
-                </div>
-
+                @endforeach
             </div>
+
+            <form action="{{ route('rev.ultimas') }}">
+                <input type="submit" class="btn-ultimasrevs" value="Ver las últimas revisiones" />
+            </form>
             
         </section>
         
     </main>
+    
 
     <footer id="contacto">
         <div class="footer contenedor">
@@ -248,22 +172,23 @@
             </div>
             <div class="iconos">
                 <a href="#"><i class="fab fa-facebook"></i></a>
-                
-                
                 <i class="fab fa-github"></i>
                 <i class="fab fa-android"></i>  
             </div>
-            <p>Copyright by Cristian Ruiz</p>
+            <p>ITTG ISC ©2018~2019 – Todos los derechos reservados. Desarrollador: Ing. Cristian Ruiz</p>
         </div>
     </footer>
-
 
 @endsection
 
 @section('scripts')
 
-    <script src="js/nav_home.js"></script>
-    <script src="js/filtro.js"></script>
-    <script src="js/bubble.js"></script>
+    <script src="{{ asset('js/nav_home.js') }}"></script>
+    <script src="{{ asset('js/obtener_salas.js') }}"></script>
+    <script src="{{ asset('js/filtro.js') }}"></script>
+    <script src="{{ asset('js/bubble.js') }}"></script>
+     <script src="{{ asset('js/ventana_emergente.js') }}"></script>
+    <script src="{{ asset('js/filtro.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/tablamobi.css') }}">
 
 @endsection
