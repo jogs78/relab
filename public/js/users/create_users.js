@@ -3,12 +3,6 @@ function cargarFormualrioUser(arg){
 		
 		var url = "/users/registraruser";
 	}
-
-	//$('#contenido-principal').html($("#cargador-usuario").html());
-
-	/*$.get(url, function(result){
-		$("#contenido-principal").html(result);
-	});*/
 }
 
 $(document).on("submit",".form-entrada", function(e){

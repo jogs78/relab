@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 //use Request;
 use Illuminate\Support\Facades\Crypt;
+use Carbon\Carbon;
 use App\User;
 use DB;
 use DataTables;
@@ -16,15 +17,16 @@ class UserController extends Controller
 
     public function __construct(){
         $this->middleware('auth');
+        
     }
     /**
      * Display a listing of the resource.
-     *
+     *     
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        //$users = User::all();
+        
         $type = DB::select( DB::raw("SHOW COLUMNS FROM users WHERE Field = 'tipo_usuario'") )[0]->Type;
              preg_match('/^enum\((.*)\)$/', $type, $matches);
              $enum = array();
@@ -33,7 +35,6 @@ class UserController extends Controller
                $v = trim( $value, "'" );
                $enum = array_add($enum, $v, $v);
              }
-             //return $enum;
         
         return view('users.users_index', compact('enum'));
     }
@@ -47,16 +48,33 @@ class UserController extends Controller
     {
         return view('users.create_users');
     }
-
+    
     //Function to get all data to the table
     public function getDataUser(){
-        //$lugares = Lugar::select('id','nombre', 'updated_at');
+        
         $users = User::all();
         return Datatables::of($users)
+        
             ->addColumn('action', function($user){
-                return '<a href="#" class="btn btn-xs btn-info edit-user" id="'. $user->id .'"><i class="fas fa-user-edit"></i></a> <a href="#" class="btn btn-xs btn-danger delete-user" id="'. $user->id .'"><i class="fas fa-trash-alt"></i></a>';
+                
+                    return '<a href="#" class="btn btn-xs btn-info edit-user" id="'. $user->id .'"><i class="fas fa-user-edit"></i></a> <a href="#" class="btn btn-xs btn-danger delete-user" id="'. $user->id .'"><i class="fas fa-trash-alt"></i></a>';
+                
+                
             })
-            ->addColumn('checkbox', '<input type="checkbox" name="user_checkbox[]" class="user_checkbox" value="{{ $id }}">')
+            ->addColumn('changeType', function($user){
+                
+                    return '<a href="javascript:void(0)" class="btn btn-xs btn-success change-type" id="'. $user->id .'"><i class="fas fa-exchange-alt"></i></a>';
+                
+                
+            })
+            //->addColumn('checkbox', '<input type="checkbox" name="user_checkbox[]" class="user_checkbox" value="{{ $id }}">')
+            ->editColumn('activo', function($user){
+                if ($user->activo == 0) {
+                    return 'Desconectado';
+                }else{
+                    return 'Conectado';
+                }
+            })
             ->editColumn('updated_at', function(User $user) {
                 if ($user->updated_at != '') {
                     return $user->updated_at->diffForHumans();   
@@ -64,7 +82,7 @@ class UserController extends Controller
                     return $user->updated_at;
                 }
                 })
-            ->rawColumns(['action','checkbox'])
+            ->rawColumns(['action','changeType'])
             ->make(true);
     }
 
@@ -83,7 +101,7 @@ class UserController extends Controller
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|string|min:6',
             'password_confirmation' => 'required|string|min:6',
-            'foto' => 'required|image|mimes:jpeg,jpg,png,gif|max:2048',
+            'foto' => 'image|mimes:jpeg,jpg,png,gif|max:2048',
         );
 
         $error = Validator::make($request->all(), $rules);
@@ -93,19 +111,31 @@ class UserController extends Controller
         }
 
         $image = $request->file('foto');
-        $new_name = rand() . '.' . $image->getClientOriginalExtension();
-        $image->move(public_path('imguser'), $new_name);
+        if ($image != '') {
+            $new_name = Carbon::now()->second.rand() . '.' . $image->getClientOriginalExtension();
+            \Storage::disk('local')->put($new_name, \File::get($image));
 
-        $form_data = array(
-            'nombre' => $request->nombre,
-            'apellido' => $request->apellido,
-            'telefono' => $request->telefono,
-            'tipo_usuario' => $request->tipo_usuario,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'path' => $new_name,
-            'numcontrol' => $request->numcontrol
-        );
+            $form_data = array(
+                'nombre' => $request->nombre,
+                'apellido' => $request->apellido,
+                'telefono' => $request->telefono,
+                'tipo_usuario' => $request->tipo_usuario,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'path' => $new_name,
+                'numcontrol' => $request->numcontrol
+            );   
+        }else{
+            $form_data = array(
+                'nombre' => $request->nombre,
+                'apellido' => $request->apellido,
+                'telefono' => $request->telefono,
+                'tipo_usuario' => $request->tipo_usuario,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'numcontrol' => $request->numcontrol
+            );
+        }
 
         User::create($form_data);
 
@@ -126,19 +156,8 @@ class UserController extends Controller
     public function fetchData(Request $request){
         if ($request->ajax()) {
             $id = $request->input('id');
-            $mobi = User::findOrFail($id);
-            /*$output = array(
-                'nombre' => $mobi->nombre,
-                'apellido' => $mobi->apellido,
-                'telefono' => $mobi->telefono,
-                'tipo_usuario' => $mobi->tipo_usuario,
-                'email' => $mobi->email,
-                'path' => $mobi->path,
-                'numcontrol' => $mobi->numcontrol
-            );*/
-
-            //echo json_encode($output);   
-            return response()->json(['data' => $mobi]);
+            $user = User::findOrFail($id);  
+            return response()->json(['data' => $user]);
         }
     }
 
@@ -181,8 +200,8 @@ class UserController extends Controller
                 return response()->json(['errors' => $error->errors()->all()]);
             }
 
-            $image_name = rand() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('imguser'), $image_name);
+            $image_name = Carbon::now()->second.rand() . '.' . $image->getClientOriginalExtension();
+            \Storage::disk('local')->put($image_name, \File::get($image));
         }else{
             $rules = array(
                 'nombre' => 'required',
@@ -198,18 +217,6 @@ class UserController extends Controller
             }
         }
 
-        /*$form_data = array(
-            'nombre' => $request->nombre,
-            'apellido' => $request->apellido,
-            'telefono' => $request->telefono,
-            'tipo_usuario' => $request->tipo_usuario,
-            'email' => $request->email,
-            'path' => $image_name,
-            'numcontrol' => $request->numcontrol
-        );
-
-        User::whereId($request->user_id)
-            ->update($form_data);*/
         $user = User::find($request->input('user_id'));
                 $user->nombre = $request->input('nombre');
                 $user->apellido = $request->input('apellido');
@@ -222,6 +229,36 @@ class UserController extends Controller
         return response()->json(['success' => 'Usuario Actualizado Correctamente']);
     }
 
+    public function changeType(Request $request){
+        if ($request->ajax()) {
+            $id_user = $request->input('id');
+            $user = User::find($id_user);
+            return response()->json([$user->tipo_usuario]);
+        }
+    }
+
+    public function moveType(Request $request){
+        $id_user = $request->input('id');
+            $user_type = $request->input('user_type');
+            $user = User::find($id_user);
+            $user->tipo_usuario = $user_type;
+
+            if ($user->save()) {
+                return response()->json(['success' => 'Tipo de usuario cambiado exitosamente!']);   
+            }else{
+                return response()->json(['error' => 'Error al cambiar el tipo de usuario!']);   
+            }
+    }
+
+//Function to see all conected users
+    public function conectedUsers(){
+        $output = '';
+        $users = User::where('activo',1)->get();
+        
+        return response()->json($users);
+        
+    }
+
     /**
      * Remove the specified resource from storage.
      *
@@ -231,6 +268,24 @@ class UserController extends Controller
     public function destroy(Request $request)
     {
         $user = User::find($request->input('id'));
+        $revision_detallada_del = DB::table('revision_detalladas')->where('user_id',$request->input('id'));
+        $revision_detallada = DB::table('revision_detalladas')
+            ->select('revision_id')
+            ->where('user_id', $request->input('id'))
+            ->get();
+
+        $array_id = array();
+        foreach($revision_detallada as $rev) {
+            $array_id[] = $rev->revision_id;
+        }
+        $revs = DB::table('revisions')
+                    ->whereIn('id', $array_id);
+        if (!empty($revision_detallada_del)) {
+            $revision_detallada_del->delete();
+        }
+        if (!empty($revs)) {
+            $revs->delete();
+        }
         if ($user->delete()) {
             return 'Usuario Eliminado Correctamente';
         }

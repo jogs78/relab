@@ -13,6 +13,6 @@ class Lugar extends Model
      * @var array
      */
     protected $fillable = [
-        'nombre'
+        'foto','nombre','user_add','user_edit'
     ];
 }

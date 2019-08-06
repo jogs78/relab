@@ -7,12 +7,18 @@ use App\User;
 use App\Lugar;
 use App\Revision;
 use App\Item;
+use App\Pc;
 use DB;
 use DataTables;
 use Validator;
 
 class RevisionesController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('home.redirect');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -98,59 +104,165 @@ class RevisionesController extends Controller
         
     }
     public function fetchDataRev($id){
-            $revision = Revision::find($id);
+        $revision = Revision::find($id);
             
-            //return response()->json(['rev' => $revision, 'rev_det' => $rev_detallada->item_id]);
-            if ($revision->tipo == '') {
-                $nombre_user_rev = User::where('id', $revision->user_id)->first();
-                $nombre_lugar_rev = Lugar::where('id', $revision->lugar_id)->first();
-                $output = array(
-                    'id' => $revision->id,
-                    'user_id' => $nombre_user_rev->nombre,
-                    'lugar_id' => $nombre_lugar_rev->nombre,
-                    'tipo' => $revision->tipo,
-                    'momento' => $revision->momento,
-                    'observaciones' => $revision->observaciones,
-                    'created_at' => $revision->created_at,
-                    'updated_at' => $revision->updated_at
-                );   
-            }else{
+        if ($revision->tipo == '') {
+
+            $nombre_user_rev = User::where('id', $revision->user_id)->first();
+            $nombre_lugar_rev = Lugar::where('id', $revision->lugar_id)->first();
+
+            $output = array(
+                'id' => $revision->id,
+                'user_id' => $nombre_user_rev->nombre . ' '.$nombre_user_rev->apellido,
+                'lugar_id' => $nombre_lugar_rev->nombre,
+                'tipo' => $revision->tipo,
+                'momento' => $revision->momento,
+                'observaciones' => $revision->observaciones,
+                'created_at' => $revision->created_at,
+                'updated_at' => $revision->updated_at
+            );   
+        }else{
                 
-                if ($revision->tipo == 'Detallada' || $revision->tipo == 'detallada') {
-                    $rev_detallada = DB::table('revision_detalladas')
-                        ->where('revision_id',$revision->id)
-                        ->get();
+            if ($revision->tipo == 'Detallada' || $revision->tipo == 'detallada') {
+                $rev_detallada = DB::table('revision_detalladas2')
+                    ->where('revision_id',$revision->id)
+                    ->get();
+
+                $array_item_id = array();
+                $array_num_maquina = array();
+                $array_tiene_camara = array();
+                $array_tiene_bocinas = array();
+                $array_num_serie_cpu = array();
+                $array_ram = array();
+                $array_disco_duro = array();
+                $array_sistema_operativo = array();
+                $array_sistema_operativo_activado = array();
+                $array_cable_vga = array();
+                $array_tiene_monitor = array();
+                $array_num_serie_monitor = array();
+                $array_tiene_teclado = array();
+                $array_tiene_raton = array();
+                $array_controlador_red = array();
+                $array_paq_office_version = array();
+                $array_paq_office_activado = array();
+                $array_observaciones = array();
+
+                foreach($rev_detallada as $det){
+                    $array_item_id[] = $det->item_id;
+                    $array_num_maquina[] = $det->num_maquina;
+                    $array_tiene_camara[] = $det->tiene_camara;
+                    $array_tiene_bocinas[] = $det->tiene_bocinas;
+                    $array_num_serie_cpu[] =$det->num_serie_cpu;
+                    $array_ram[] = $det->ram;
+                    $array_disco_duro[] = $det->disco_duro;
+                    $array_sistema_operativo[] = $det->sistema_operativo;
+                    $array_sistema_operativo_activado[] = $det->sistema_operativo_activado;
+                    $array_cable_vga[] = $det->cable_vga;
+                    $array_tiene_monitor[] = $det->tiene_monitor;
+                    $array_num_serie_monitor[] = $det->num_serie_monitor;
+                    $array_tiene_teclado[] = $det->tiene_teclado;
+                    $array_tiene_raton[] = $det->tiene_raton;
+                    $array_controlador_red[] = $det->controlador_red;
+                    $array_paq_office_version[] = $det->paq_office_version;
+                    $array_paq_office_activado[] = $det->paq_office_activado;
+                    $array_observaciones[] = $det->observaciones;
+                }
+
+                $items_all = Item::whereIn('id', $array_item_id)->get();
+                $array_todo_items = array();
+                foreach ($items_all as $ia) {
+                    $array_todo_items[] = $ia->marca;
+                }
+
+                $pcs_all = Pc::whereIn('item_id', $array_item_id)
+                    ->orderBy('num_maquina','desc')
+                    ->get();
+                $array_num_maquina_pc = array();
+                $array_tiene_camara_pc = array();
+                $array_tiene_bocinas_pc = array();
+                $array_num_serie_cpu_pc = array();
+                $array_ram_pc = array();
+                $array_disco_duro_pc = array();
+                $array_sistema_operativo_pc = array();
+                $array_sistema_operativo_activado_pc = array();
+                $array_cable_vga_pc = array();
+                $array_tiene_monitor_pc = array();
+                $array_num_serie_monitor_pc = array();
+                $array_tiene_teclado_pc =array();
+                $array_tiene_raton_pc = array();
+                $array_controlador_red_pc =array();
+                $array_paq_office_version_pc = array();
+                $array_paq_office_activado_pc = array();
+                $array_observaciones_pc = array();
+
+                    foreach ($pcs_all as $pcs) {
+                        $array_num_maquina_pc[] = $pcs->num_maquina;
+                        $array_tiene_camara_pc[] = $pcs->tiene_camara;
+                        $array_tiene_bocinas_pc[] = $pcs->tiene_bocinas;
+                        $array_num_serie_cpu_pc[] = $pcs->num_serie_cpu;
+                        $array_ram_pc[] = $pcs->ram;
+                        $array_disco_duro_pc[] = $pcs->disco_duro;
+                        $array_sistema_operativo_pc[] = $pcs->sistema_operativo;
+                        $array_sistema_operativo_activado_pc[] = $pcs->sistema_operativo_activado;
+                        $array_cable_vga_pc[] = $pcs->cable_vga;
+                        $array_tiene_monitor_pc[] = $pcs->tiene_monitor;
+                        $array_num_serie_monitor_pc[] = $pcs->num_serie_monitor;
+                        $array_tiene_teclado_pc[] = $pcs->tiene_teclado;
+                        $array_tiene_raton_pc[] = $pcs->tiene_raton;
+                        $array_controlador_red_pc[] = $pcs->controlador_red;
+                        $array_paq_office_version_pc[] = $pcs->paq_office_version;
+                        $array_paq_office_activado_pc[] = $pcs->paq_office_activado;
+                        $array_observaciones_pc[] = $pcs->observaciones;
+                    }
 
                     $nombre_user_rev = User::where('id', $revision->user_id)->first();
                     $nombre_lugar_rev = Lugar::where('id', $revision->lugar_id)->first();
 
                     $output = array(
                         'id' => $revision->id,
-                        'user_id' => $nombre_user_rev->nombre,
+                        'user_id' => $nombre_user_rev->nombre.' '.$nombre_user_rev->apellido,
                         'lugar_id' => $nombre_lugar_rev->nombre,
                         'tipo' => $revision->tipo,
                         'momento' => $revision->momento,
                         'observaciones' => $revision->observaciones,
                         'created_at' => $revision->created_at,
                         'updated_at' => $revision->updated_at,
-                        'item_id' => $rev_detallada[0]->item_id,
-                        'num_maquina' => $rev_detallada[0]->num_maquina,
-                        'tiene_camara' => $rev_detallada[0]->tiene_camara,
-                        'tiene_bocinas' => $rev_detallada[0]->tiene_bocinas,
-                        'num_serie_cpu' => $rev_detallada[0]->num_serie_cpu,
-                        'ram' => $rev_detallada[0]->ram,
-                        'disco_duro' => $rev_detallada[0]->disco_duro,
-                        'sistema_operativo' => $rev_detallada[0]->sistema_operativo,
-                        'sistema_operativo_activado' => $rev_detallada[0]->sistema_operativo_activado,
-                        'cable_vga' => $rev_detallada[0]->cable_vga,
-                        'tiene_monitor' => $rev_detallada[0]->tiene_monitor,
-                        'num_serie_monitor' => $rev_detallada[0]->num_serie_monitor,
-                        'tiene_teclado' => $rev_detallada[0]->tiene_teclado,
-                        'tiene_raton' => $rev_detallada[0]->tiene_raton,
-                        'controlador_red' => $rev_detallada[0]->controlador_red,
-                        'paq_office_version' => $rev_detallada[0]->paq_office_version,
-                        'paq_office_activado' => $rev_detallada[0]->paq_office_activado,
-                        'observaciones' => $rev_detallada[0]->observaciones
+                        'item_id' => $array_item_id,
+                        'num_maquina' => $array_num_maquina,
+                        'tiene_camara' => $array_tiene_camara,
+                        'tiene_bocinas' => $array_tiene_bocinas,
+                        'num_serie_cpu' => $array_num_serie_cpu,
+                        'ram' => $array_ram,
+                        'disco_duro' => $array_disco_duro,
+                        'sistema_operativo' => $array_sistema_operativo,
+                        'sistema_operativo_activado' => $array_sistema_operativo_activado,
+                        'cable_vga' => $array_cable_vga,
+                        'tiene_monitor' => $array_tiene_monitor,
+                        'num_serie_monitor' => $array_num_serie_monitor,
+                        'tiene_teclado' => $array_tiene_teclado,
+                        'tiene_raton' => $array_tiene_raton,
+                        'controlador_red' => $array_controlador_red,
+                        'paq_office_version' => $array_paq_office_version,
+                        'paq_office_activado' => $array_paq_office_activado,
+                        'observaciones' => $array_observaciones,
+                        'items_all' => $array_todo_items,
+                        'pc_num_maquina' => $array_num_maquina_pc,
+                        'pc_tiene_camara' => $array_tiene_camara_pc,
+                        'pc_tiene_bocinas' => $array_tiene_bocinas_pc,
+                        'pc_num_serie_cpu' => $array_num_serie_cpu_pc,
+                        'pc_ram' => $array_ram_pc,
+                        'pc_disco_duro' => $array_disco_duro_pc,
+                        'pc_sistema_operativo' => $array_sistema_operativo_pc,
+                        'pc_sistema_operativo_activado' => $array_sistema_operativo_activado_pc,
+                        'pc_cable_vga' => $array_cable_vga_pc,
+                        'pc_tiene_monitor' => $array_tiene_monitor_pc,
+                        'pc_num_serie_monitor' => $array_num_serie_monitor_pc,
+                        'pc_tiene_teclado' => $array_tiene_teclado_pc,
+                        'pc_tiene_raton' => $array_tiene_raton_pc,
+                        'pc_controlador_red' => $array_controlador_red_pc,
+                        'pc_paq_office_version' => $array_paq_office_version_pc,
+                        'pc_paq_office_activado' => $array_paq_office_activado_pc,
+                        'pc_observaciones' => $array_observaciones_pc
                     );
 
                 }else if($revision->tipo == 'rapida' || $revision->tipo == 'Rapida' || $revision->tipo == 'Rápida'){
@@ -158,6 +270,39 @@ class RevisionesController extends Controller
                     $rev_rapida = DB::table('revision_rapidas')
                         ->where('revision_id',$revision->id)
                         ->get();
+
+                    $pc_cant = DB::table('items')
+                        ->where('lugar_id', $revision->lugar_id)
+                        ->where('clasificacion','Pc')
+                        ->count();
+                    $mesa_cant = DB::table('items')
+                        ->where('lugar_id', $revision->lugar_id)
+                        ->where('clasificacion','Mesa')
+                        ->count();
+                    $silla_cant = DB::table('items')
+                        ->where('lugar_id', $revision->lugar_id)
+                        ->where('clasificacion','Silla')
+                        ->count();
+                    $piz_cant = DB::table('items')
+                        ->where('lugar_id', $revision->lugar_id)
+                        ->where('clasificacion','Pizarrón')
+                        ->count();
+                    $television_cant = DB::table('items')
+                        ->where('lugar_id', $revision->lugar_id)
+                        ->where('clasificacion','Television')
+                        ->count();
+                    $termostato_cant = DB::table('items')
+                        ->where('lugar_id', $revision->lugar_id)
+                        ->where('clasificacion','Termostato')
+                        ->count();
+                    $ruteador_cant = DB::table('items')
+                        ->where('lugar_id', $revision->lugar_id)
+                        ->where('clasificacion','Ruteador')
+                        ->count();
+                    $swith_cant = DB::table('items')
+                        ->where('lugar_id', $revision->lugar_id)
+                        ->where('clasificacion','Switch')
+                        ->count();
 
                     $array_clasi = array();
                     $array_cant = array();
@@ -172,49 +317,64 @@ class RevisionesController extends Controller
 
                     $output = array(
                         'id' => $revision->id,
-                        'user_id' => $nombre_user_rev->nombre,
+                        'user_id' => $nombre_user_rev->nombre.' '.$nombre_user_rev->apellido,
                         'lugar_id' => $nombre_lugar_rev->nombre,
                         'tipo' => $revision->tipo,
                         'momento' => $revision->momento,
                         'observaciones' => $revision->observaciones,
                         'created_at' => $revision->created_at,
                         'updated_at' => $revision->updated_at,
+                        'pc_cant' => $pc_cant,
+                        'mesa_cant' => $mesa_cant,
+                        'silla_cant' => $silla_cant,
+                        'piz_cant' => $piz_cant,
+                        'television_cant' => $television_cant,
+                        'termostato_cant' => $termostato_cant,
+                        'ruteador_cant' => $ruteador_cant,
+                        'swith_cant' => $swith_cant,
                         'clasificacion' => $array_clasi,
                         'cantidad' => $array_cant
                     );
                 }
             }
 
-            //echo json_encode($output);   
             return response()->json($output);
 
     }
 
     public function fetch_data(Request $request, $id){
         if ($request->from_date != '' && $request->to_date != '') {
-                
-                $data = DB::table('revisions')
-                    ->where('lugar_id', $id)
-                    ->whereBetween('momento', array($request->from_date, $request->to_date))
-                    ->get();
+            $data = DB::table('revisions')
+                ->where('lugar_id', $id)
+                ->whereBetween('momento', array($request->from_date, $request->to_date))
+                ->get();
 
-                $array_revs = array();
-                foreach($data as $revs){
-                    $array_revs[] = $revs->user_id;
+            $array_updated = array();
+
+            foreach($data as $datup){
+                if ($datup->updated_at != '') {
+                    $array_updated[] =  \Carbon\Carbon::parse($datup->updated_at)->diffForHumans();   
+                }else{
+                    $array_updated[] = $datup->updated_at;
                 }
-
-                $user_data = User::whereIn('id',$array_revs)->get();
-                $array_users = array();
-                foreach($user_data as $user_name){
-                    $array_users[] = $user_name;
-                }
-
-                $lugar = Lugar::find($id);
-
             }
-            return response()->json(['user' => $array_users, 'lugar' => $lugar->nombre, 'revs' => $data]);
-            //return response()->json(['user' => $user_data, 'rev' => $data]);
 
+            $array_revs = array();
+            foreach($data as $revs){
+                $array_revs[] = $revs->user_id;
+            }
+
+            $user_data = User::whereIn('id',$array_revs)->get();
+            $array_users = array();
+            foreach($user_data as $user_name){
+                $array_users[] = $user_name;
+            }
+
+            $lugar = Lugar::find($id);
+
+        }
+        
+        return response()->json(['user' => $array_users, 'lugar' => $lugar->nombre, 'revs' => $data, 'act' => $array_updated]);
     }
 
     /**
@@ -260,18 +420,19 @@ class RevisionesController extends Controller
 
                     if($row->tipo == ''){
                         $output .= '
-                            <div class="card border-info mb-3">
-                                <div class="card-header" id="title_header"><h4>Revisión: '. $row->tipo.' - Lugar: '. $lugar->nombre .' </h4></div>
+                            <div class="card border-info mb-3 text-center">
+                                <div class="card-header" id="title_header"><h4>Revisión: '. $row->tipo.' - Lugar: '. $lugar->nombre .' </h4> </div>
                                     <div class="card-body text-info">
                                     <h4 class="card-title" id="title_body">Nombre del revisor: '. $revisor->nombre .' '.$revisor->apellido.'</h4>
                                     
                                     <p class="card-text">Momento: '.$row->momento.' - Observaciones: '.$row->observaciones.'</p>
-                                    <p class="card-text">Núm. de Maquina: '.$datos_det->num_maquina.'</p>
+                                    <a href="#" class="btn btn-xs btn-info edit-rev col-md-4 right" id="'. $row->id .'">Ver Detalles <i class="fas fa-eye"></i></a>
                               </div>';
                               if ($row->updated_at != '') {
                                 $up = \Carbon\Carbon::parse($row->created_at)->diffForHumans();
                                 $output .= '<div class="card-footer bg-transparent border-success">Actualizado: '.$up.'</div>
                             </div>
+
                             ';
                                 }else{
                                     $output .= '<div class="card-footer bg-transparent border-success">Actualizado: '.$row->updated_at.'</div>
@@ -281,19 +442,23 @@ class RevisionesController extends Controller
                             $last_id = $row->id;
 
                     }else if ($row->tipo == 'Detallada' || $row->tipo == 'detallada') {
-                        $datos_det = DB::table('revision_detalladas')
+                        $datos_det = DB::table('revision_detalladas2')
                             ->where('revision_id', $row->id)
-                            ->first();
-                        $item_num = Item::find($datos_det->item_id);
+                            ->get();
 
+                    
+                        //$item_num = Item::find($datos_det->item_id);
+                            //Clasificación: '.$item_num->clasificacion.'
                         $output .= '
-                            <div class="card border-info mb-3">
-                                <div class="card-header" id="title_header"><h4>Revisión: '. $row->tipo.' - Lugar: '. $lugar->nombre .' Clasificación: '.$item_num->clasificacion.'</h4></div>
+                            <div class="card border-info mb-3 text-center">
+                                <div class="card-header" id="title_header"><h4>Revisión: '. $row->tipo.' - Lugar: '. $lugar->nombre .' </h4> </div>
                                     <div class="card-body text-info">
-                                    <h4 class="card-title" id="title_body">Nombre del revisor: '. $revisor->nombre .' '.$revisor->apellido.'</h4>
-                                    <p class="card-text">Descripción: '.$item_num->descripcion.', Modelo: '.$item_num->modelo.', Estado: '.$item_num->estado.', Marca: '.$item_num->marca.', Número de inventario: '.$item_num->numero_inventario.', Número de Serie: '.$item_num->numero_serie.'</p>
-                                    <p class="card-text">Momento: '.$row->momento.' - Observaciones: '.$row->observaciones.'</p>
-                                    <p class="card-text">Núm. de Maquina: '.$datos_det->num_maquina.'</p>
+                                    <h4 class="card-title" id="title_body">Nombre del revisor: '. $revisor->nombre .' '.$revisor->apellido.'</h4>';
+                                    /*for ($i = 0; $i < count($datos_det); $i++) {
+                                        $output .= '<p class="card-text">Item: '.json_encode($array_item_id[$i]);
+                                    }*///.', Modelo: '.$item_num->modelo.', Estado: '.$item_num->estado.', Marca: '.$item_num->marca.', Número de inventario: '.$item_num->numero_inventario.', Número de Serie: '.$item_num->numero_serie.'</p>*/
+                                    $output .= '<p class="card-text">Momento: '.$row->momento.' - Observaciones: '.$row->observaciones.'</p>
+                                    <a href="#" class="btn btn-xs btn-info edit-rev col-md-4 right" id="'. $row->id .'">Ver Detalles <i class="fas fa-eye"></i></a>
                               </div>';
                               if ($row->updated_at != '') {
                                 $up = \Carbon\Carbon::parse($row->created_at)->diffForHumans();
@@ -320,16 +485,16 @@ class RevisionesController extends Controller
                         }
                         
                         $output .= '
-                            <div class="card border-info mb-3">
-                                <div class="card-header" id="title_header"><h4>Revisión: '. $row->tipo.' - Lugar: '. $lugar->nombre .'</h4></div>
+                            <div class="card border-info mb-3 text-center">
+                                <div class="card-header" id="title_header"><h4>Revisión: '. $row->tipo.' - Lugar: '. $lugar->nombre .'</h4>  </div>
                                     <div class="card-body text-info">
                                     <h4 class="card-title" id="title_body">Nombre del revisor: '. $revisor->nombre .' '.$revisor->apellido.'</h4>
                                     <p class="card-text"> Momento: '.$row->momento.' - Observaciones: '.$row->observaciones.'</p>';
                                 
-                               for ($i = 0; $i < count($datos_rap); $i++) {
+                               /*for ($i = 0; $i < count($datos_rap); $i++) {
                                     $output .= '<p class="card-text">Clasificación: '.json_encode($array_clas[$i]).', Cantidad: '.json_encode($array_cant[$i]).'</p>';
-                                }
-                                $output .= '</div>';
+                                }*/
+                                $output .= '<a href="#" class="btn btn-xs btn-info edit-rev col-md-4 right" id="'. $row->id .'">Ver Detalles <i class="fas fa-eye"></i></a> </div>';
                               if ($row->updated_at != '') {
                                 $up = \Carbon\Carbon::parse($row->created_at)->diffForHumans();
                                 $output .= '<div class="card-footer bg-transparent border-success">Actualizado: '.$up.'</div>
@@ -363,6 +528,51 @@ class RevisionesController extends Controller
             echo $output;
 
         }
+    }
+
+    public function notifyRevs(Request $request){
+        $output = '';
+        $visto = $request->view;
+
+        if ($visto == 'yes') {
+            DB::table('revisions')
+                ->where('status_vista', 0)
+                ->update(['status_vista' => 1]);
+        }else if($visto != ''){
+            DB::table('revisions')
+                ->where('id', $visto)
+                ->update(['status_vista' => 1]);
+        }
+
+        $revisiones = DB::table('revisions')
+            ->where('status_vista', 0)
+            ->orWhere('status_vista',1)
+            ->orderBy('momento', 'desc')
+            ->limit(5)
+            ->get();
+
+        if (count($revisiones) >= 0) {
+            foreach($revisiones as $revision){
+                $output .= '
+                        <li class="elemento_noti ml-1 mr-3" id="visto_'.$revision->status_vista.'">
+                            <a href="#" id="'.$revision->id.'" class="dropdown-item not_visto">
+                                <strong>Revisión: '.$revision->tipo.'</strong><br>
+                                <small><em>'.$revision->momento.'</em></small>
+                            </a>
+                        </li>
+                        ';
+            }   
+        }
+
+        $revisiones_1 = DB::table('revisions')->where('status_vista', 0)->count();
+        $data = array(
+            'notification' => $output,
+            'unseen_notification' => $revisiones_1,
+            'visto' => $visto
+        );
+
+        return response()->json($data);
+        
     }
     /**
      * Remove the specified resource from storage.

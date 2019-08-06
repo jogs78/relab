@@ -3,15 +3,10 @@
 @section('links')
 <link href="{{ URL::asset('css/nav_mobi.css') }}" rel="stylesheet" type="text/css" >
 	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
 
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-	<style>
-		body{
-			background: rgba(237, 248, 251, .9);
-		}
-	</style>
 @endsection
 
 
@@ -25,16 +20,7 @@
                     <img src="{{ asset('images/logo_ittg.png') }}" alt="">
                 </div>
                 <div class="enlaces" id="enlaces">
-                  <a href="{{ url('/home') }}" class="btn-header">Inicio</a>
-                    {{--<a href="#" id="btnChooseMobi" class="btn-header">Agregar Mobiliario o Equipo</a>--}}
-                    
-                  <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logout-form').submit();">
-                      {{ __('Cerrar Sesión') }}
-                  </a>
-
-                  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                  </form>
+                  <a href="{{ url('/') }}" class="btn-header"><i class="fas fa-home"></i></a>
 
                 </div>
 
@@ -64,19 +50,31 @@
 @section('content')
 	
 	<div class="container">
+		@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
 		<div class="right">
 			<button type="button" name="agregar_lugar" id="agregar_lugar" class="btn btn-success btn-sm">Agregar Nuevo Lugar</button>
 		</div>
+		@endif
 		<br>
 	<table class="table table-bordered" id="lugares_table" style="width: 100%;">
 		<thead>
 			<tr>
+				<th>Foto</th>
 				<th>Nombre</th>
+				<th>Agregó</th>
+				<th>Actualizó</th>
 				<th>Actualizado</th>
+				@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
 				<th>Opciones</th>
+				@endif
+				@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
 				<th>Eliminar multiples <button type="button" class="btn btn-danger btn-xs" name="bulk_delete" id="bulk_delete_lugar"><i class="fas fa-trash-alt"></i></button></th>
+				@endif
 			</tr>
 		</thead>
+		<tbody>
+			
+		</tbody>
 	</table>
 	<br>
 	</div>
@@ -87,22 +85,29 @@
 		<div class="modal-content">
 			<form method="POST" id="lugar-form">
 				<div class="modal-header">
-					<h5 class="modal-title">Agregar un Lugar</h5>
+					<h5 class="modal-title"></h5>
 			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 			          <span aria-hidden="true">&times;</span>
 			        </button>
 				</div>
 				<div class="modal-body">
-					{{ csrf_field() }}
+					@csrf
 					<span id="form-output"></span>
 					<div class="form-group">
 						<label for="nombre">Ingresa el nombre del lugar</label>
 						<input type="text" class="form-control" name="nombre" id="nombre">
 					</div>
+					<div class="form-group">
+						<label for="foto">Selecciona la foto del lugar</label>
+						<input type="file" class="form-control" name="foto_lugar" id="foto">
+						<span id="store_image_edit"></span>
+					</div>
 				</div>
 				<div class="modal-footer">
 					<input type="hidden" name="lugar_id" id="lugar_id" value="insert_lugar">
 					<input type="hidden" name="button_action" id="button_action" value="insert_lugar">
+					<input type="hidden" name="user_add" id="user_add" value="{{ Auth::id() }}">
+					<input type="hidden" name="user_edit" id="user_edit" value="{{ Auth::id() }}">
 					<input type="submit" class="btn btn-info" name="submit" id="action" value="Agregar">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
 				</div>
@@ -123,6 +128,7 @@
       </div>
       <div class="modal-body">
         <p id="msj_confirmation_modal"></p>
+        <p class="text-danger" id="msj_confirmation_modal2"></p>
       </div>
       <div class="modal-footer">
         <button type="button" id="confirm_yes" class="btn btn-danger">Aceptar</button>
@@ -164,6 +170,7 @@
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
 
 <script>
+
 	$(document).ready(function(){
 
 		$("#lugares_table").DataTable({
@@ -171,10 +178,31 @@
 			"serverSide": true,
 			"ajax": "{{ route('lugares.getdata') }}",
 			"columns": [
+				{ data: 'foto',
+                  name: 'foto',
+					render: function(data, type, full, meta){
+						if (data != null) {
+							return '<img src="{{ URL::to('/') }}/imguser/'+data+'" width="70" class="img-tumbnail">'
+						}else{
+							return '<img src="/images/mobi1.jpg" width="70" class="img-tumbnail">'
+						}
+                      },
+                orderable:false},
 				{"data": "nombre"},
+				{"data": "user_add",
+				 "name": "user_add"},
+				{"data": "user_edit"},
 				{ "data" : "updated_at"},
-				{ "data" : "action", orderable:false, searchable:false},
+				@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
+				{ "data" : "action",
+                      render: function(data, type, full, meta){
+                        return data;
+                      },
+                   orderable:false, searchable:false},
+                @endif
+                @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
 				{ "data" : "checkbox", orderable:false, searchable:false}
+				@endif
 			],
 			"language": {
                     "info": "_TOTAL_ registros en total",
@@ -202,18 +230,23 @@
 			$("#lugarModal").modal('show');
 			$("#lugar-form")[0].reset();
 			$("#form-output").html('');
+			$(".modal-title").text('Agregar nuevo lugar')
 			$("#button_action").val('insert_lugar');
+			$("#store_image_edit").html('');
 			$("#action").val('Agregar');
 		});
 
 //Function to add a new place in the lugars table
 		$("#lugar-form").on('submit', function(event){
 			event.preventDefault();
-			var form_data = $(this).serialize();
+			//var form_data = $(this).serialize();
 			$.ajax({
 				url: '{{ route("lugares.postdata") }}',
 				method: "POST",
-				data: form_data,
+				data: new FormData(this),
+				contentType: false,
+		        cache: false,
+		        processData: false,
 				dataType: "json",
 				success: function(data){
 					if (data.error.length > 0) {
@@ -252,6 +285,7 @@
 				dataType: 'json',
 				success:function(data){
 					$("#nombre").val(data.nombre);
+					$("#store_image_edit").html('<img src="/imguser/'+data.foto+'" width="70" class="img-thumbnail">');
 					$("#lugar_id").val(id);
 					$("#lugarModal").modal('show');
 					$("#action").val('Editar');
@@ -268,6 +302,7 @@
 			$("#confirmation_modal").modal('show');
 			$("#modalTitleDelete").text('Eliminar Lugar');
 			$("#msj_confirmation_modal").text('¿Estás seguro de que quieres borrar este lugar?');
+			$("#msj_confirmation_modal2").text('Toma en cuenta que si el lugar tiene mobiliario o equipo el sistema no te dejará eliminarlo');
 			$("#confirm_yes").on('click', function(){
 				$.ajax({
 					url: "{{ route('lugares.removedata') }}",

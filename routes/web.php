@@ -11,9 +11,9 @@
 |
 */
 
-Route::get('/', function () {
+/*Route::get('/login', function () {
     return view('auth.login');
-});
+});*/
 
 //Lugares Routes
 Route::get('/lugares', 'LugarController@index')->name('lugares.index');
@@ -25,12 +25,17 @@ Route::get('/lugares/eliminar_varios_lugares','LugarController@massRemoveLugar')
 
 //Mobiliario Routes
 Route::resource('mobis', 'MobiController');
-Route::post('/mobi_agregarnuevo','MobiController@store')->name('mobi.agregarnuevo');
+Route::post('/mobi_agregarnuevo','MobiController@addMobiliario');
 Route::get('/mobi_lugar/{id}','MobiController@byLugarMobi')->name('mobis.lugarmobi');
 Route::get('/mobi_fetchdata/{id}', 'MobiController@fetchDataMobiliario')->name('mobi_fetchdata');
+//Cantidades por items
+Route::get('/cant_items','MobiController@itemsQuantity');
 Route::post('/mobi_update', 'MobiController@update')->name('mobi.update');
+//Function to show item details
+Route::post('/mobi_detail','MobiController@showDetailMobi')->name('mobi.detail');
 Route::get('/mobi_change', 'MobiController@changeLugar')->name('mobi.changelugar');
 Route::post('/mobi_move', 'MobiController@moveLugar');
+Route::get('/mobi_several_change','MobiController@severalChangeMobi');
 Route::get('/mobi_destroy', 'MobiController@destroy')->name('mobi.destroy');
 Route::get('/mobi_multipledestroy','MobiController@multipleDestroy')->name('mobi.multiplesDestroy');
 
@@ -42,6 +47,9 @@ Route::get('/rev_daterange/fetch_data/{id}', 'RevisionesController@fetch_data')-
 Route::get('/rev_ultimas', 'RevisionesController@revUltimasView')->name('rev.ultimas');
 Route::post('/rev_ultimas/load_more', 'RevisionesController@revUltimas')->name('rev.ultimasloadmore');
 
+//Notifications
+Route::post('/notify_revs','RevisionesController@notifyRevs')->name('rev.notify_revs');
+
 
 //Users Routes
 Route::get('/users', 'UserController@index');
@@ -52,7 +60,10 @@ Route::get('/users/fetchdata','UserController@fetchData')->name('users.fetchdata
 Route::post('/users/update', 'UserController@update')->name('users.update');
 Route::get('/users/destroy', 'UserController@destroy')->name('users.destroy');
 Route::get('/users/multipledestroy','UserController@multipleDestroy')->name('users.multiplesDestroy');
+Route::get('/user_change_type', 'UserController@changeType');
+Route::post('/user_type_move','UserController@moveType');
 Route::post('/users/search','UserController@search')->name('search');
+Route::get('/users_conected','UserController@conectedUsers');
 Route::resource('users', 'UserController');
 
 //Auth::routes();
@@ -70,4 +81,4 @@ Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm
 Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
     
 //Home Route
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/', 'HomeController@index')->name('home');

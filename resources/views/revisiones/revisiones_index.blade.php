@@ -9,8 +9,7 @@
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
 {{-- This link provide of a bootstrap datepicker --}}
@@ -29,15 +28,7 @@
                     <img src="{{ asset('images/logo_ittg.png') }}" alt="">
                 </div>
                 <div class="enlaces" id="enlaces">
-                  <a href="{{ url('/home') }}" class="btn-header">Inicio</a>
-                    
-                  <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logout-form').submit();">
-                      {{ __('Cerrar Sesión') }}
-                  </a>
-
-                  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                  </form>
+                  <a href="{{ url('/') }}" class="btn-header"><i class="fas fa-home"></i></a>
 
                 </div>
 
@@ -99,6 +90,7 @@
             <th>Tipo de Revisión</th>
             <th>Momento</th>
             <th>Observaciones</th>
+            <th>Actualizado</th>
             <th>Opciones</th>
           </tr>
         </thead>
@@ -110,50 +102,46 @@
 
 
 {{-- Edit form --}}
-<div class="modal fade" id="revisionEditModal" role="dialog">
-  <div class="modal-dialog">
+<div class="modal fade" tabindex="-1" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true" id="revisionEditModal" role="dialog">
+  <div class="modal-dialog modal-xl">
     <div class="modal-content">
 
       <form method="POST" id="rev_edit_form">
         <div class="modal-header">
-          <h4 class="modal-title">Editar Revision</h4>
+          <h4 class="modal-title">Detalles de Revisión</h4>
           <button type="button" class="close" data-dismiss="modal">&times;</button>
         </div>
         <div class="modal-body">
           @csrf
           <span id="form-output"></span>
-          <div class="form-group">
-            <label for="path">Usuario</label>
+          <div class="row">
+            <label for="user_id_edit" id="label_user_edit">Usuario</label>
             <input type="text" class="form-control" name="user_id_edit" id="user_id_edit" disabled>
+            <label for="first_name" id="label_lugar_edit">Lugar</label>
+            <input type="text" class="form-control" name="lugar_id_edit" id="lugar_id_edit" disabled>
           </div>
 
           <div class="form-group">
-            <label for="first_name">Lugar</label>
-            <input type="text" class="form-control" name="lugar_id_edit" id="lugar_id_edit" disabled>
+            
           </div>
-           <div class="form-group">
-            <label for="first_name">Tipo</label>
+           <div class="row">
+            <label for="tipo_edit" id="label_tipo_edit">Tipo</label>
             <input type="text" class="form-control" id="tipo_edit" disabled>
-            <div class="form-group" id="select_tipo">
-              
-            </div>
+            <label for="momento_edit" id="label_momento_edit">Momento</label>
+            <input type="text" class="form-control" name="momento_edit" id="momento_edit" disabled>
           </div>
            <div class="form-group">
-            <label for="first_name">Momento</label>
-            <input type="text" class="form-control" name="momento_edit" id="momento_edit" disabled>
+            
           </div>
            <div class="form-group">
             <label for="first_name">Observaciones</label>
             <input type="text" class="form-control" name="observaciones_edit" id="observaciones_edit" disabled>
           </div>
-           <div class="form-group">
-            <label for="first_name">Creado</label>
-            <input type="text" class="form-control" name="created_at_edit" id="created_at_edit" disabled>
-          </div>
-          <div class="form-group">
+           
+          {{--<div class="form-group">
             <label for="last_name">Actualizado</label>
             <input type="text" class="form-control" name="updated_at_edit" id="updated_at_edit" disabled>
-          </div>
+          </div>--}}
           
           <div class="form-group" id="rev_detallada_form">
             
@@ -164,8 +152,8 @@
 
         </div>
         <div class="modal-footer">
-          <input type="hidden" name="rev_id_edit" id="rev_id_edit">
-          <input type="hidden" name="revdet_id_edit" id="revdet_id_edit">
+          {{--<input type="hidden" name="rev_id_edit" id="rev_id_edit">
+          <input type="hidden" name="revdet_id_edit" id="revdet_id_edit">--}}
           
           {{--<input type="submit" class="btn btn-info" name="submit" id="action" value="Editar">--}}
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -175,6 +163,7 @@
     </div>
   </div>
 </div>    
+
 
 
 {{-- Information Modal --}}
@@ -198,6 +187,7 @@
                   <th>Tipo de Revisión</th>
                   <th>Momento</th>
                   <th>Observaciones</th>
+                  <th>Actualizado</th>
                   <th>Opciones</th>
                 </tr>
               </thead>
@@ -217,6 +207,7 @@
 @endsection
 
 @section('scripts')
+
 <script src="{{ asset('js/nav_mobi.js') }}"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
@@ -236,6 +227,7 @@
                     {data: 'tipo'},
                     {data: 'momento'},
                     {data: 'observaciones'},
+                    {data: 'updated_at'},
                     {data: 'action', orderable:false, searchable:false},
                     //{data: 'checkbox', orderable:false, searchable:false}
                 ],
@@ -293,7 +285,8 @@
               output += '<td>' + data.revs[i].tipo + '</td>';
               output += '<td>' + data.revs[i].momento + '</td>';
               output += '<td>' + data.revs[i].observaciones + '</td>';
-              output += '<td><a href="javascript:void(0)" class="btn btn-xs btn-primary edit-rev" id="'+data.revs[i].id+'"><i class="fas fa-eye"></i>Ver</a><a href="#" class="btn btn-xs btn-danger delete-rev" id="'+data.revs[i].id+'"><i class="fas fa-trash-alt"></i></a></td>';
+              output += '<td>' + data.act[i] + '</td>';
+              output += '<td><a href="javascript:void(0)" class="btn btn-xs btn-info edit-rev" id="'+data.revs[i].id+'"><i class="fas fa-eye"></i></a>';//<a href="#" class="btn btn-xs btn-danger delete-rev" id="'+data.revs[i].id+'"><i class="fas fa-trash-alt"></i></a></td>';
               output += '</tr>';
             }
             $("#modalTitleInfo").text('Total de registros encontrados: '+data.revs.length);

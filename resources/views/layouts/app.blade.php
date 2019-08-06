@@ -36,7 +36,7 @@
             @yield('content')
         </main>
     </div>
-    <footer> ITTG ISC ©2018~2019 – Todos los derechos reservados. Desarrollador: Ing. Cristian Ruiz</footer>
+    <footer> ITTG ISC ©2018~2019 – Todos los derechos reservados. Desarrollador: <a href="mailto:cristianruiz1195@gmail.com" class="call-to-action" style="color:#000;">Ing. Cristian Ruiz</a></footer>
 
     @yield('scripts')
 </body>

@@ -2,127 +2,403 @@ $(document).on('click', '.edit-rev', function(event){
               event.preventDefault();
               var id = $(this).attr('id');
               
-              $.ajax({
+              verDetallesRevisiones(id)
+});
+
+function verDetallesRevisiones(id){
+  $.ajax({
                 url: "/rev_fetchdata/"+id,
                 method: "get",
                 dataType: 'json',
                 success:function(data){
                   var html ='';
                   var htmlRap  = '';
-                  var tipoHtml = '';
                   
                   if (data.tipo != '') {
 
                     if (data.tipo == 'Detallada' || data.tipo == 'detallada') {
                       $("#user_id_edit").val(data.user_id);
+                      $("#label_user_edit").addClass('col-md-1');
+                      $("#user_id_edit").addClass('col-md-4');
                       $("#lugar_id_edit").val(data.lugar_id);
+                      $("#label_lugar_edit").addClass('col-md-1 ml-auto');
+                      $("#lugar_id_edit").addClass('col-md-4 ml-auto');
                       $("#tipo_edit").val(data.tipo);
+                      $("#label_tipo_edit").addClass('col-md-1');
+                      $("#tipo_edit").addClass('col-md-4');
                       $("#momento_edit").val(data.momento);
+                      $("#label_momento_edit").addClass('col-md-1 ml-auto');
+                      $("#momento_edit").addClass('col-md-4 ml-auto');
                       $("#observaciones_edit").val(data.observaciones);
-                      $("#created_at_edit").val(data.created_at);
-                      $("#updated_at_edit").val(data.updated_at);
-                      html += '<label for="last_name">Id del Item</label>';
-                      html += '<input type="text" class="form-control" name="item_id_edit" id="item_id_edit" value="'+data.item_id+'" disabled>';
-                      html += '<label for="last_name">Número de Maquina</label>';
-                      html += '<input type="text" class="form-control" name="num_maquina_edit" id="num_maquina_edit" value="'+data.num_maquina+'" disabled>';
-                      if (data.tiene_camara == 1) {
-                        html += '<label for="last_name">Tiene Cámara</label>';
-                        html += '<input type="text" class="form-control" name="tiene_camara_edit" id="tiene_camara_edit" value="Si" disabled>';
-                      }else{
-                        html += '<label for="last_name">Tiene Cámara</label>';
-                        html += '<input type="text" class="form-control" name="tiene_camara_edit" id="tiene_camara_edit" value="No" disabled>';
+                      //$("#updated_at_edit").val(data.updated_at);
+
+                      html += '<div class="table-responsive">';
+                      html += '<table class="table table-sm table-dark">';
+                      html += '<thead>';
+                      html += '<tr>';
+                      html += '<h4>Datos Pcs Existentes</h4>';
+                      html += '<th>Marca</th>';
+                      html += '<th>N# de Maquina</th><th>Tiene Cámara</th><th>Tiene Bocinas</th><th>N# Serie CPU</th><th>RAM</th>';
+                      html += '<th>Disco Duro</th><th>Sistema Operativo</th><th>SO Activado</th><th>Cable VGA</th>';
+                      html += '<th>Tiene Monitor</th><th>N# Serie Monitor</th><th>Tiene Teclado</th><th>Tiene Ratón</th>';
+                      html += '<th>Controlador de Red</th><th>Versión Office</th><th>Ofiice Activado</th><th>Observaciones</th>';
+                      html += '</tr>';
+                      html += '</thead>';
+                      html += '<tbody>';
+                      
+                      for (var i = 0; i < data.item_id.length; i++) {
+                        html += '<tr>';
+                        html += '<td>'+data.items_all[i]+'</td>';
+                        html += '<td>'+data.pc_num_maquina[i]+'</td>';
+                        if (data.pc_tiene_camara == 1) {
+                          html += '<td>Si</td>';
+                        }else{
+                          html += '<td>No</td>';
+                        }
+                        if (data.pc_tiene_bocinas == 1) {
+                          html += '<td>Si</td>';
+                        }else{
+                          html += '<td>No</td>';
+                        }
+                        html += '<td>'+data.pc_num_serie_cpu[i]+'</td>';
+                        html += '<td>'+data.pc_ram[i]+'</td>';
+                        html += '<td>'+data.pc_disco_duro[i]+'</td><td>'+data.pc_sistema_operativo[i]+'</td>';
+                        if (data.pc_sistema_operativo_activado[i] == 1) {
+                          html += '<td>Si</td>';
+                        }else{
+                          html += '<td>No</td>';
+                        }
+                        if (data.pc_cable_vga[i] == 1) {
+                          html += '<td>Si</td>';
+                        }else{
+                          html += '<td>No</td>';
+                        }
+                        if (data.pc_tiene_monitor[i] == 1) {
+                          html += '<td>Si</td>';
+                        }else{
+                          html += '<td>No</td>';
+                        }
+                        html += '<td>'+data.pc_num_serie_monitor[i]+'</td>';
+                        if (data.pc_tiene_teclado[i] == 1) {
+                          html += '<td>Si</td>';
+                        }else{
+                          html += '<td>No</td>';
+                        }
+                        if (data.pc_tiene_raton[i] == 1) {
+                          html += '<td>Si</td>';
+                        }else{
+                          html += '<td>No</td>';
+                        }
+                        if (data.pc_controlador_red[i] == 1) {
+                          html += '<td>Si</td>';
+                        }else{
+                          html += '<td>No</td>';
+                        }
+                        html += '<td>'+data.pc_paq_office_version[i]+'</td>';
+                        if (data.pc_paq_office_activado[i] == 1) {
+                          html += '<td>Si</td>';
+                        }else{
+                          html += '<td>No</td>';
+                        }
+                        html += '<td>'+data.pc_observaciones[i]+'</td>';
                       }
-                      if (data.tiene_bocinas == 1) {
-                        html += '<label for="last_name">Tiene Bocinas</label>';
-                        html += '<input type="text" class="form-control" name="tiene_bocinas_edit" id="tiene_bocinas_edit" value="Si" disabled>';
-                      }else{
-                        html += '<label for="last_name">Tiene Bocinas</label>';
-                        html += '<input type="text" class="form-control" name="tiene_bocinas_edit" id="tiene_bocinas_edit" value="No" disabled>';
+                      
+                      html += '</tbody>';
+                      html += '</table>';
+
+                      
+                      
+                      html += '<table class="table table-sm" id="revs_table">';
+                      html += '<thead class="thead-dark">';
+                      html += '<tr>';
+                      html += '<h4>Datos de Revisión Detallada</h4>';
+                      html += '<th>Marca</th>';
+                      html += '<th>N# de Maquina</th><th>Tiene Cámara</th><th>Tiene Bocinas</th><th>N# Serie CPU</th><th>RAM</th>';
+                      html += '<th>Disco Duro</th><th>Sistema Operativo</th><th>SO Activado</th><th>Cable VGA</th>';
+                      html += '<th>Tiene Monitor</th><th>N# Serie Monitor</th><th>Tiene Teclado</th><th>Tiene Ratón</th>';
+                      html += '<th>Controlador de Red</th><th>Versión Office</th><th>Ofiice Activado</th><th>Observaciones</th>';
+                      html += '</tr>';
+                      html += '</thead>';
+                      html += '<tbody>';
+                      
+                      for (var i = 0; i < data.item_id.length; i++) {
+                        html += '<tr>';
+                        
+                          html += '<td class="table-success">'+data.items_all[i]+'</td>';
+                        
+                        if (data.num_maquina[i] == data.pc_num_maquina[i]) {
+                          html += '<td class="table-success">'+data.num_maquina[i]+'</td>';
+                        }else{
+                          html += '<td class="table-danger">'+data.num_maquina[i]+'</td>';
+                        }
+                        if (data.tiene_camara[i] == 1 && data.pc_tiene_camara[i] != data.tiene_camara[i]) {
+                          html += '<td class="table-danger">Si</td>';
+                        }else if(data.tiene_camara[i] == 1 && data.pc_tiene_camara[i] == data.tiene_camara[i]){
+                          html += '<td class="table-success">Si</td>';
+                        }else if(data.tiene_camara[i] == 0 && data.pc_tiene_camara[i] != data.tiene_camara[i]){
+                          html += '<td class="table-danger">No</td>';
+                        }else{
+                          html += '<td class="table-success">No</td>';
+                        }
+                        if (data.tiene_bocinas[i] == 1 && data.pc_tiene_bocinas[i] != data.tiene_bocinas[i]) {
+                          html += '<td class="table-danger">Si</td>';
+                        }else if(data.tiene_bocinas[i] == 1 && data.pc_tiene_bocinas[i] == data.tiene_bocinas[i]){
+                          html += '<td class="table-success">Si</td>';
+                        }else if(data.tiene_bocinas[i] == 0 && data.pc_tiene_bocinas[i] != data.tiene_bocinas[i]){
+                          html += '<td class="table-danger">No</td>';
+                        }else{
+                          html += '<td class="table-success">No</td>';
+                        }
+                        if (data.num_serie_cpu[i] == data.pc_num_serie_cpu[i]) {
+                          html += '<td class="table-success">'+data.num_serie_cpu[i]+'</td>';
+                        }else{
+                          html += '<td class="table-danger">'+data.num_serie_cpu[i]+'</td>';
+                        }
+                        if (data.ram[i] == data.pc_ram[i]) {
+                          html += '<td class="table-success">'+data.ram[i]+'</td>';
+                        }else{
+                          html += '<td class="table-danger">'+data.ram[i]+'</td>';
+                        }
+                        if (data.disco_duro[i] == data.pc_disco_duro[i]) {
+                          html += '<td class="table-success">'+data.disco_duro[i]+'</td>';
+                        }else{
+                          html += '<td class="table-danger">'+data.disco_duro[i]+'</td>';
+                        }
+                        if (data.sistema_operativo[i] == data.pc_sistema_operativo[i]) {
+                          html += '<td class="table-success">'+data.sistema_operativo[i]+'</td>';
+                        }else{
+                          html += '<td class="table-danger">'+data.sistema_operativo[i]+'</td>';
+                        }
+                        if (data.sistema_operativo_activado[i] == 1 && data.pc_sistema_operativo_activado[i] != data.sistema_operativo_activado[i]) {
+                          html += '<td class="table-danger">Si</td>';
+                        }else if(data.sistema_operativo_activado[i] == 1 && data.pc_sistema_operativo_activado[i] == data.sistema_operativo_activado[i]){
+                          html += '<td class="table-success">Si</td>';
+                        }else if(data.sistema_operativo_activado[i] == 0 && data.pc_sistema_operativo_activado[i] != data.sistema_operativo_activado[i]){
+                          html += '<td class="table-danger">No</td>';
+                        }else{
+                          html += '<td class="table-success">No</td>';
+                        }
+                        if (data.cable_vga[i] == 1 && data.pc_cable_vga[i] != data.cable_vga[i]) {
+                          html += '<td class="table-danger">Si</td>';
+                        }else if(data.cable_vga[i] == 1 && data.pc_cable_vga[i] == data.cable_vga[i]){
+                          html += '<td class="table-success">Si</td>';
+                        }else if(data.cable_vga[i] == 0 && data.pc_cable_vga[i] != data.cable_vga[i]){
+                          html += '<td class="table-danger">No</td>';
+                        }else{
+                          html += '<td class="table-success">No</td>';
+                        }
+                        if (data.tiene_monitor[i] == 1 && data.pc_tiene_monitor[i] != data.tiene_monitor[i]) {
+                          html += '<td class="table-danger">Si</td>';
+                        }else if(data.tiene_monitor[i] == 1 && data.pc_tiene_monitor[i] == data.tiene_monitor[i]){
+                          html += '<td class="table-success">Si</td>';
+                        }else if(data.tiene_monitor[i] == 0 && data.pc_tiene_monitor[i] != data.tiene_monitor[i]){
+                          html += '<td class="table-danger">No</td>';
+                        }else{
+                          html += '<td class="table-success">No</td>';
+                        }
+                        if (data.num_serie_monitor[i] == data.pc_num_serie_monitor[i]) {
+                          html += '<td class="table-success">'+data.num_serie_monitor[i]+'</td>';
+                        }else{
+                          html += '<td class="table-danger">'+data.num_serie_monitor[i]+'</td>';
+                        }
+                        if (data.tiene_teclado[i] == 1 && data.pc_tiene_teclado[i] != data.tiene_teclado) {
+                          html += '<td class="table-danger">Si</td>';
+                        }else if(data.tiene_teclado[i] == 1 && data.pc_tiene_teclado[i] == data.tiene_teclado){
+                          html += '<td class="table-success">Si</td>';
+                        }else if(data.tiene_teclado[i] == 0 && data.pc_tiene_teclado[i] != data.tiene_teclado){
+                          html += '<td class="table-danger">No</td>';
+                        }else{
+                          html += '<td class="table-success">No</td>';
+                        }
+                        if (data.tiene_raton[i] == 1 && data.pc_tiene_raton[i] != data.tiene_raton[i]) {
+                          html += '<td class="table-danger">Si</td>';
+                        }else if(data.tiene_raton[i] == 1 && data.pc_tiene_raton[i] == data.tiene_raton[i]){
+                          html += '<td class="table-success">Si</td>';
+                        }else if(data.tiene_raton[i] == 0 && data.pc_tiene_raton[i] != data.tiene_raton[i]){
+                          html += '<td class="table-danger">No</td>';
+                        }else{
+                          html += '<td class="table-success">No</td>';
+                        }
+                        if (data.controlador_red[i] == 1 && data.pc_controlador_red[i] != data.controlador_red[i]) {
+                          html += '<td class="table-danger">Si</td>';
+                        }else if(data.controlador_red[i] == 1 && data.pc_controlador_red[i] == data.controlador_red[i]){
+                          html += '<td class="table-success">Si</td>';
+                        }else if(data.controlador_red[i] == 0 && data.pc_controlador_red[i] != data.controlador_red[i]){
+                          html += '<td class="table-danger">No</td>';
+                        }else{
+                          html += '<td class="table-success">No</td>';
+                        }
+                        if (data.paq_office_version[i] == data.pc_paq_office_version[i]) {
+                          html += '<td class="table-success">'+data.paq_office_version[i]+'</td>';
+                        }else{
+                          html += '<td class="table-danger">'+data.paq_office_version[i]+'</td>';
+                        }
+                        if (data.paq_office_activado[i] == 1 && data.pc_paq_office_activado[i] != data.paq_office_activado[i]) {
+                          html += '<td class="table-danger">Si</td>';
+                        }else if(data.paq_office_activado[i] == 1 && data.pc_paq_office_activado[i] == data.paq_office_activado[i]){
+                          html += '<td class="table-success">Si</td>';
+                        }else if(data.paq_office_activado[i] == 0 && data.pc_paq_office_activado[i] != data.paq_office_activado[i]){
+                          html += '<td class="table-danger">No</td>';
+                        }else{
+                          html += '<td class="table-success">No</td>';
+                        }
+                        html += '<td class="table-success">'+data.observaciones[i]+'</td>';
+                        html += '</tr>';
                       }
-                      html += '<label for="last_name">Número de Serie CPU</label>';
-                      html += '<input type="text" class="form-control" name="num_serie_cpu_edit" id="num_serie_cpu_edit" value="'+data.num_serie_cpu+'" disabled>';
-                      html += '<label for="last_name">RAM</label>';
-                      html += '<input type="text" class="form-control" name="ram_edit" id="ram_edit" value="'+data.ram+'" disabled>';
-                      html += '<label for="last_name">Disco Duro</label>';
-                      html += '<input type="text" class="form-control" name="disco_duro_edit" id="disco_duro_edit" value="'+data.disco_duro+'" disabled>';
-                      html += '<label for="last_name">Sistema Operativo</label>';
-                      html += '<input type="text" class="form-control" name="sistema_operativo_edit" id="sistema_operativo_edit" value="'+data.sistema_operativo+'" disabled>';
-                      if (data.sistema_operativo_activado == 1) {
-                        html += '<label for="last_name">Sistema Operativo Activado</label>';
-                        html += '<input type="text" class="form-control" name="sitema_operativo_activado_edit" id="sitema_operativo_activado_edit" value="Si" disabled>';
-                      }else{
-                        html += '<label for="last_name">Sistema Operativo Activado</label>';
-                        html += '<input type="text" class="form-control" name="sitema_operativo_activado_edit" id="sitema_operativo_activado_edit" value="No" disabled>';
-                      }
-                      if (data.cable_vga == 1) {
-                        html += '<label for="last_name">Cable VGA</label>';
-                        html += '<input type="text" class="form-control" name="cable_vga_edit" id="cable_vga_edit" value="Si" disabled>';
-                      }else{
-                        html += '<label for="last_name">Cable VGA</label>';
-                        html += '<input type="text" class="form-control" name="cable_vga_edit" id="cable_vga_edit" value="No" disabled>';
-                      }
-                      if (data.tiene_monitor == 1) {
-                        html += '<label for="last_name">Tiene Monitor</label>';
-                        html += '<input type="text" class="form-control" name="tiene_monitor_edit" id="tiene_monitor_edit" value="Si" disabled>';
-                      }else{
-                        html += '<label for="last_name">Tiene Monitor</label>';
-                        html += '<input type="text" class="form-control" name="tiene_monitor_edit" id="tiene_monitor_edit" value="No" disabled>';
-                      }
-                      if (data.tiene_teclado == 1) {
-                        html += '<label for="last_name">Tiene Teclado</label>';
-                        html += '<input type="text" class="form-control" name="tiene_teclado_edit" id="tiene_teclado_edit" value="Si" disabled>';
-                      }else{
-                        html += '<label for="last_name">Tiene Teclado</label>';
-                        html += '<input type="text" class="form-control" name="tiene_teclado_edit" id="tiene_teclado_edit" value="No" disabled>';
-                      }
-                      if (data.tiene_raton == 1) {
-                        html += '<label for="last_name">Tiene Ratón</label>';
-                        html += '<input type="text" class="form-control" name="tiene_raton_edit" id="tiene_raton_edit" value="Si" disabled>';
-                      }else{
-                        html += '<label for="last_name">Tiene Ratón</label>';
-                        html += '<input type="text" class="form-control" name="tiene_raton_edit" id="tiene_raton_edit" value="No" disabled>';
-                      }
-                      if (data.controlador_red == 1) {
-                        html += '<label for="last_name">Controlador de Red</label>';
-                        html += '<input type="text" class="form-control" name="controlador_red_edit" id="controlador_red_edit" value="Si" disabled>';
-                      }else{
-                        html += '<label for="last_name">Controlador de Red</label>';
-                        html += '<input type="text" class="form-control" name="controlador_red_edit" id="controlador_red_edit" value="No" disabled>';
-                      }
-                      html += '<label for="last_name">Versión de Office</label>';
-                      html += '<input type="text" class="form-control" name="paq_office_version_edit" id="paq_office_version_edit" value="'+data.paq_office_version+'" disabled>';
-                      if (data.paq_office_activado == 1) {
-                        html += '<label for="last_name">Office Activado</label>';
-                        html += '<input type="text" class="form-control" name="paq_office_activado_edit" id="paq_office_activado_edit" value="Si" disabled>';
-                      }else{
-                        html += '<label for="last_name">Office Activado</label>';
-                        html += '<input type="text" class="form-control" name="paq_office_activado_edit" id="paq_office_activado_edit" value="No" disabled>';
-                      }
-                      html += '<label for="last_name">Observaciones</label>';
-                      html += '<input type="text" class="form-control" name="observaciones_edit" id="observaciones_edit" value="'+data.observaciones+'" disabled>';
-                      $("#select_tipo").html(tipoHtml);
+                      
+                      html += '</tbody>';
+                      html += '</table>';
+
+                      html += '<div>';
+                      //for (var i = 0; i < data.items_all.length; i++) {
+                        console.log(data.items_all);
+                      //}
                       $('#rev_rapida_form').html(html);
                       
                     }else if(data.tipo == 'Rápida' || data.tipo == 'Rapida' ||data.tipo == 'rapida'){
-                        $("#user_id_edit").val(data.user_id);
+                      $("#user_id_edit").val(data.user_id);
+                      $("#label_user_edit").addClass('col-md-1');
+                      $("#user_id_edit").addClass('col-md-4');
                       $("#lugar_id_edit").val(data.lugar_id);
+                      $("#label_lugar_edit").addClass('col-md-1 ml-auto');
+                      $("#lugar_id_edit").addClass('col-md-4 ml-auto');
                       $("#tipo_edit").val(data.tipo);
+                      $("#label_tipo_edit").addClass('col-md-1');
+                      $("#tipo_edit").addClass('col-md-4');
                       $("#momento_edit").val(data.momento);
+                      $("#label_momento_edit").addClass('col-md-1 ml-auto');
+                      $("#momento_edit").addClass('col-md-4 ml-auto');
                       $("#observaciones_edit").val(data.observaciones);
-                      $("#created_at_edit").val(data.created_at);
-                      $("#updated_at_edit").val(data.updated_at);
-                      htmlRap += '<table class="table table-striped table-bordered" id="revs_table">';
+
+                      htmlRap += '<table class="table table-sm table-dark" id="revs_table">';
                       htmlRap += '<thead>';
+                      htmlRap += '<h4 class="center">Cantidades Items Existentes</h4>';
                       htmlRap += '<tr>';
-                      htmlRap += '<th>Clasificación</th>';
-                      htmlRap += '<th>Cantidad</th>';
+                      htmlRap += '<th>PC</th>'
+                      htmlRap += '<th>Mesa</th>';
+                      htmlRap += '<th>Silla</th>';
+                      htmlRap += '<th>Pizarrones</th>';
+                      htmlRap += '<th>Televisión</th>';
+                      htmlRap += '<th>Termostato</th>';
+                      htmlRap += '<th>Ruteador</th>';
+                      htmlRap += '<th>Switch</th>';
                       htmlRap += '</tr>';
                       htmlRap += '</thead>';
                       htmlRap += '<tbody>';
+                      htmlRap += '<tr>';
+                      htmlRap += '<td>'+data.pc_cant+'</td>'
+                      
+                        htmlRap += '<td>'+data.mesa_cant+'</td><td>'+data.silla_cant+'</td><td>'+data.piz_cant+'</td>';
+                        htmlRap += '<td>'+data.television_cant+'</td><td>'+data.termostato_cant+'</td>';
+                        htmlRap += '<td>'+data.ruteador_cant+'</td><td>'+data.swith_cant+'</td>';
+                        htmlRap += '</tr>';
+                      
+                      
+                      htmlRap += '</tbody>';
+                      htmlRap += '</table>';
+                      
+                      htmlRap += '<table class="table table-striped table-bordered" id="revs_table">';
+                      htmlRap += '<thead>';
+                      htmlRap += '<h4 alight="center">Datos Revisión Rápida</h4>';
+                      htmlRap += '<tr>';
+                      htmlRap += '<th>Clasificación</th>';
+                      htmlRap += '<th>Cantidad Revisada</th>';
+                      htmlRap += '<th>Cantidad de Faltantes</th>';
+                      htmlRap += '<th>Cantidad de Sobrantes</th>';
+                      htmlRap += '</tr>';
+                      htmlRap += '</thead>';
+                      htmlRap += '<tbody>';
+                      htmlRap += '<tr>';
                       
                       for (var i = 0; i < data.cantidad.length; i++) {
-                        htmlRap += '<tr>';
-                        htmlRap += '<td>'+data.clasificacion[i]+'</td><td>'+data.cantidad[i]+'</td>';
+                        if (data.clasificacion[i] == 'Pc') {
+                          if (data.cantidad[i] != data.pc_cant && data.cantidad[i] > data.pc_cant) {
+                            var falta_pc = data.cantidad[i] - data.pc_cant;
+                            htmlRap += '<td class="table-danger">Pc</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">0</td><td class="table-danger">'+falta_pc+'</td>';                            }else if(data.cantidad[i] != data.pc_cant && data.cantidad[i] < data.pc_cant){
+                            var falta_pc = data.pc_cant - data.cantidad[i];
+                            htmlRap += '<td class="table-danger">Pc</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">'+falta_pc+'</td><td class="table-danger">0</td>';  
+                          }else{
+                            htmlRap += '<td class="table-success">Pc</td><td class="table-success">'+data.cantidad[i]+'</td><td class="table-success">0</td><td class="table-success">0</td>';  
+                          }
+                        }
+                        if (data.clasificacion[i] == 'Mesa') {
+                          if (data.cantidad[i] != data.mesa_cant && data.cantidad[i] > data.mesa_cant) {
+                            var falta_cant = data.cantidad[i] - data.mesa_cant;
+                            htmlRap += '<td class="table-danger">Mesa</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">0</td><td class="table-danger">'+falta_cant+'</td>';  
+                          }else if(data.cantidad[i] != data.mesa_cant && data.cantidad[i] < data.mesa_cant){
+                            var falta_cant = data.mesa_cant - data.cantidad[i];
+                            htmlRap += '<td class="table-danger">Mesa</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">'+falta_cant+'</td><td class="table-danger">0</td>';  
+                          }else{
+                            htmlRap += '<td class="table-success">Mesa</td><td class="table-success">'+data.cantidad[i]+'</td><td class="table-success">0</td><td class="table-success">0</td>';  
+                          }
+                        }
+                        if (data.clasificacion[i] == 'Silla') {
+                          if (data.cantidad[i] != data.silla_cant && data.cantidad[i] > data.silla_cant) {
+                            var falta_cant = data.cantidad[i] - data.silla_cant;
+                            htmlRap += '<td class="table-danger">Silla</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">0</td><td class="table-danger">'+falta_cant+'</td>';  
+                          }else if(data.cantidad[i] != data.silla_cant && data.cantidad[i] < data.silla_cant){
+                            var falta_cant = data.silla_cant - data.cantidad[i];
+                            htmlRap += '<td class="table-danger">Silla</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">'+falta_cant+'</td><td class="table-danger">0</td>';  
+                          }else{
+                            htmlRap += '<td class="table-success">Silla</td><td class="table-success">'+data.cantidad[i]+'</td><td class="table-success">0</td><td class="table-success">0</td>';  
+                          }
+                        }
+                        if (data.clasificacion[i] == 'Pizarrón') {
+                          if (data.cantidad[i] != data.piz_cant && data.cantidad[i] > data.piz_cant) {
+                            var falta_cant = data.cantidad[i] - data.piz_cant;
+                            htmlRap += '<td class="table-danger">Pizarrnes</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">0</td><td class="table-danger">'+falta_cant+'</td>';  
+                          }else if(data.cantidad[i] != data.piz_cant && data.cantidad[i] < data.piz_cant){
+                            var falta_cant = data.silla_cant - data.cantidad[i];
+                            htmlRap += '<td class="table-danger">Pizarrones</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">'+falta_cant+'</td><td class="table-danger">0</td>';  
+                          }else{
+                            htmlRap += '<td class="table-success">Pizarrones</td><td class="table-success">'+data.cantidad[i]+'</td><td class="table-success">0</td><td class="table-success">0</td>';  
+                          }
+                        }
+                        if (data.clasificacion[i] == 'Television' || data.clasificacion[i] == 'Televisión') {
+                          if (data.cantidad[i] != data.television_cant && data.cantidad[i] > data.television_cant) {
+                            var falta_cant = data.cantidad[i] - data.television_cant;
+                            htmlRap += '<td class="table-danger">Televisión</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">0</td><td class="table-danger">'+falta_cant+'</td>';  
+                          }else if(data.cantidad[i] != data.television_cant && data.cantidad[i] < data.television_cant){
+                            var falta_cant = data.television_cant - data.cantidad[i];
+                            htmlRap += '<td class="table-danger">Televisión</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">'+falta_cant+'</td><td class="table-danger">0</td>';  
+                          }else{
+                            htmlRap += '<td class="table-success">Televisión</td><td class="table-success">'+data.cantidad[i]+'</td><td class="table-success">0</td><td class="table-success">0</td>';  
+                          }
+                        }
+                        if (data.clasificacion[i] == 'Termostato') {
+                          if (data.cantidad[i] != data.termostato_cant && data.cantidad[i] > data.termostato_cant) {
+                            var falta_cant = data.cantidad[i] - data.termostato_cant;
+                            htmlRap += '<td class="table-danger">Termostato</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">0</td><td class="table-danger">'+falta_cant+'</td>';  
+                          }else if(data.cantidad[i] != data.termostato_cant && data.cantidad[i] < data.termostato_cant){
+                            var falta_cant = data.termostato_cant - data.cantidad[i];
+                            htmlRap += '<td class="table-danger">Termostato</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">'+falta_cant+'</td><td class="table-danger">0</td>';
+                          }else{
+                            htmlRap += '<td class="table-success">Termostato</td><td class="table-success">'+data.cantidad[i]+'</td><td class="table-success">0</td><td class="table-success">0</td>';  
+                          }
+                        }
+                        if (data.clasificacion[i] == 'Ruteador') {
+                          if (data.cantidad[i] != data.ruteador_cant && data.cantidad[i] > data.ruteador_cant) {
+                            var falta_cant = data.cantidad[i] - data.ruteador_cant;
+                            htmlRap += '<td class="table-danger">Ruteador</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">0</td><td class="table-danger">'+falta_cant+'</td>';  
+                          }else if(data.cantidad[i] != data.ruteador_cant && data.cantidad[i] < data.ruteador_cant){
+                            var falta_cant = data.ruteador_cant - data.cantidad[i];
+                            htmlRap += '<td class="table-danger">Ruteador</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">'+falta_cant+'</td><td class="table-danger">0</td>';
+                          }else{
+                            htmlRap += '<td class="table-success">Ruteador</td><td class="table-success">'+data.cantidad[i]+'</td><td class="table-success">0</td><td class="table-success">0</td>';  
+                          }
+                        }
+                        if (data.clasificacion[i] == 'Switch') {
+                          if (data.cantidad[i] != data.swith_cant && data.cantidad[i] > data.swith_cant) {
+                            var falta_cant = data.cantidad[i] - data.swith_cant;
+                            htmlRap += '<td class="table-danger">Switch</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">0</td><td class="table-danger">'+falta_cant+'</td>';  
+                          }else if(data.cantidad[i] != data.swith_cant && data.cantidad[i] < data.swith_cant){
+                            var falta_cant = data.swith_cant - data.cantidad[i];
+                            htmlRap += '<td class="table-danger">Switch</td><td class="table-danger">'+data.cantidad[i]+'</td><td class="table-danger">'+falta_cant+'</td><td class="table-danger">0</td>';
+                          }else{
+                            htmlRap += '<td class="table-success">Switch</td><td class="table-success">'+data.cantidad[i]+'</td><td class="table-success">0</td><td class="table-success">0</td>';  
+                          }
+                        }
+                        //htmlRap += '<td>'+data.clasificacion[i]+'</td><td>'+data.cantidad[i]+'</td>';
                         htmlRap += '</tr>';
                       }
                       
@@ -134,12 +410,19 @@ $(document).on('click', '.edit-rev', function(event){
                     
                   }else{
                       $("#user_id_edit").val(data.user_id);
+                      $("#label_user_edit").addClass('col-md-1');
+                      $("#user_id_edit").addClass('col-md-4');
                       $("#lugar_id_edit").val(data.lugar_id);
+                      $("#label_lugar_edit").addClass('col-md-1 ml-auto');
+                      $("#lugar_id_edit").addClass('col-md-4 ml-auto');
                       $("#tipo_edit").val(data.tipo);
+                      $("#label_tipo_edit").addClass('col-md-1');
+                      $("#tipo_edit").addClass('col-md-4');
                       $("#momento_edit").val(data.momento);
+                      $("#label_momento_edit").addClass('col-md-1 ml-auto');
+                      $("#momento_edit").addClass('col-md-4 ml-auto');
                       $("#observaciones_edit").val(data.observaciones);
-                      $("#created_at_edit").val(data.created_at);
-                      $("#updated_at_edit").val(data.updated_at);
+                      //$("#updated_at_edit").val(data.updated_at);
                     
                   }
                     //$("#revisionEditModal").css('z-index','100');
@@ -154,7 +437,7 @@ $(document).on('click', '.edit-rev', function(event){
         });
 
     $('#rev_rapida_form').html('');
-});
+}
 
 
 $('#rev_edit_form').on('submit', function(event){

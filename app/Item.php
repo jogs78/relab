@@ -15,7 +15,7 @@ class Item extends Model
      * @var array
      */
     protected $fillable = [
-        'clasificacion','descripcion','modelo','estado', 'path', 'marca','numero_inventario','numero_serie','lugar_id'
+        'clasificacion','descripcion','modelo','estado', 'path', 'marca','numero_inventario','numero_serie','lugar_id','user_id','user_edit'
     ];
 
 public static function getEnumValues($table, $column)

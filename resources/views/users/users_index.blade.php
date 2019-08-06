@@ -11,8 +11,8 @@
 
 
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
-
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  
   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">    
 
 @endsection
@@ -28,18 +28,7 @@
                     <img src="images/logo_ittg.png" alt="">
                 </div>
                 <div class="enlaces" id="enlaces">
-                    <a href="{{ url('/home') }}" id="enlace-inicio" class="btn-header">Inicio</a>
-
-                    
-                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                        {{ __('Cerrar Sesión') }}
-                    </a>
-
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                        @csrf
-                    </form>
+                    <a href="{{ url('/') }}" id="enlace-inicio" class="btn-header"><i class="fas fa-home"></i></a>
 
                 </div>
 
@@ -73,10 +62,23 @@
 
 @section('content')
 
-<div class="container">
-    <div class="right">
-      <button type="button" name="agregar_user" id="agregar_user" class="btn btn-success btn-sm">Agregar Nuevo Usuario <i class="fas fa-plus"></i></button>
-    </div>
+
+
+  <br>
+  <div class="container">
+  
+    <div class="row">
+      <div class="col-sm">
+        @if(Auth::user()->tipo_usuario == 'Jefe')
+          <button type="button" name="agregar_user" id="agregar_user" class="btn btn-success btn-sm">Agregar Nuevo Usuario <i class="fas fa-plus"></i></button>
+        @endif
+      </div>
+      <div class="col-">
+        <a href="#" class="btn btn-xs btn-info edit-user" id="{{ Auth::user()->id }}"><i class="fas fa-user-edit"></i>Editar mis Datos</a>
+      </div>
+    </div>    
+  </div>
+  <br>
     <div class="table-responsive">
         <table id="users_table" class="table table-striped table-bordered" width="100%">
           <thead>
@@ -88,15 +90,21 @@
               <th>Tipo de Usuario</th>
               <th>Email</th>
               <th>Num. de Control</th>
-              <th>Actualizado</th>
+              <th>Estado</th>
+              <th>Modificado</th>
+              @if(Auth::user()->tipo_usuario == 'Jefe')
+              <th>Cambiar Tipo</th>
+              @endif
+              @if(Auth::user()->tipo_usuario == 'Jefe')
               <th>Opciones</th>
-              <th><button type="button" class="btn btn-danger btn-xs" name="bulk_delete" id="bulk_delete_user"><i class="fas fa-user-times"></i></button></th>
+              @endif
+              {{--<th><button type="button" class="btn btn-danger btn-xs" name="bulk_delete" id="bulk_delete_user"><i class="fas fa-user-times"></i></button></th>--}}
             </tr>
           </thead>
         </table>
     </div>   
       
-    </div>
+    
 
 
 {{-- Form CReate User --}}
@@ -105,7 +113,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <div class="modal-header">
-            <h5 class="modal-title" id="modalTitleUser">Agregar un Lugar</h5>
+            <h5 class="modal-title" id="modalTitleUser"></h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -140,7 +148,7 @@
           <div class="form-group row add">
               <label for="tipo_usuario" class="control-label col-sm-2">Tipo</label>
               <div class="col-sm-10">
-                <select name="tipo_usuario" id="tipo_usuario">
+                <select class="form-control" name="tipo_usuario" id="tipo_usuario">
                   @foreach($enum as $en)
                   <option value="{{$en}}">{{$en}}</option>
                   @endforeach
@@ -172,7 +180,7 @@
           <div class="form-group row add">
               <label for="foto" class="control-label col-sm-2">Foto</label>
               <div class="col-sm-10">
-                <input type="file" class="form-control" id="foto" name="foto" required>
+                <input type="file" class="form-control" id="foto" name="foto">
               </div>
           </div>
 
@@ -296,6 +304,41 @@
   </div>
 </div>
 
+{{-- Change Type form --}}
+<div class="modal fade" id="userChangeTypeModal" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+        <div class="modal-header">
+          <h4 class="modal-title">Cambiar el tipo de usuario</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <span id="form-output"></span>
+          <div class="form-group">
+              <label for="lugar_actual">Tipo de usuario actual</label>
+              <input type="text" class="form-control" id="tipo_actual" disabled>
+          </div>
+          <div class="form-group">
+            <label for="tipo_actual">Elegir Nuevo Tipo de Usuario</label>
+              <select class="form-control" name="select_change_type" id="select_change_type">
+                @foreach($enum as $en)
+                  <option value="{{$en}}">{{$en}}</option>
+                  @endforeach
+              </select>
+          </div>
+         
+        </div>
+        <div class="modal-footer">
+          <input type="hidden" name="user_id_change" id="user_id_change">
+          <button type="button" class="btn btn-info" id="action_change_type">Cambiar</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+
+    </div>
+  </div>
+</div>
+
 
 {{-- Confirmation Modal before Delete --}}
 <div class="modal" id="confirmation_modal" tabindex="-1" role="dialog">
@@ -309,10 +352,32 @@
       </div>
       <div class="modal-body">
         <p id="msj_confirmation_modal"></p>
+        <p class="text-danger" id="msj_confirmation_modal2"></p>
       </div>
       <div class="modal-footer">
-        <button type="button" id="confirm_yes" class="btn btn-primary">Aceptar</button>
+        <button type="button" id="confirm_yes" class="btn btn-danger">Aceptar</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{{-- Information Modal --}}
+<div class="modal" id="informationModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitleInfo">Información</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="msj_information_modal"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
       </div>
     </div>
   </div>
@@ -336,6 +401,16 @@
 <script>
   $(document).ready(function() {
 
+  infoUserFoto();
+
+  function infoUserFoto(){
+    $("#modalTitleInfo").text("Indicaciones!");
+      $("#modalTitleInfo").addClass("text-success");
+      $("#msj_information_modal").text("Para un mejor control, se les solicita poner una foto de perfil. Gracias!");
+      $("#msj_information_modal").addClass("text-success");
+      $("#informationModal").modal('show');
+  }
+
             $('#users_table').DataTable({
                 "processing": true,
                 "serverSide": true,
@@ -355,9 +430,23 @@
                     {data: 'tipo_usuario'},
                     {data: 'email'},
                     {data: 'numcontrol'},
+                    {data: 'activo'},
                     {data: 'updated_at'},
-                    { "data" : "action", orderable:false, searchable:false},
-                    { "data" : "checkbox", orderable:false, searchable:false}
+                    @if(Auth::user()->tipo_usuario == 'Jefe')
+                    { "data" : "changeType",
+                      render: function(data, type, full, meta){
+                        return data;
+                      },
+                      orderable:false, searchable:false,},
+                    @endif
+                    @if(Auth::user()->tipo_usuario == 'Jefe')
+                    { "data" : "action",
+                      render: function(data, type, full, meta){
+                        return data;
+                      },
+                      orderable:false, searchable:false,},
+                    @endif
+                    //{ "data" : "checkbox", orderable:false, searchable:false}
                 ],
                 "language": {
                     "info": "_TOTAL_ registros en total",
@@ -494,6 +583,7 @@
       $("#confirmation_modal").modal('show');
       $("#modalTitleDelete").text('Eliminar Usuario');
       $("#msj_confirmation_modal").text('¿Estás seguro de que quieres borrar este Usuario?');
+      $("#msj_confirmation_modal2").text('Toma en cuenta que al eliminar un usuario también estarás eliminando todas las revisiones que realizó');
       $("#confirm_yes").on('click', function(){
         $.ajax({
           url: "{{ url('users/destroy') }}",
@@ -545,23 +635,49 @@
 });
 
 
-  //Show User function
-    $(document).on('click','.showuser-modal', function(){
-      $("#show-user").modal('show');
-      $(".modal-title").text('Ver Usuario');
-      $("#path_user").attr("src", $(this).data('path'));
-      $("#path_u").text($(this).data('path'));
-      $("#id_user").text($(this).data('id'));
-      $("#nombre_user").text($(this).data('nombre'));
-      $("#apellido_user").text($(this).data('apellido'));
-      $("#telefono_user").text($(this).data('telefono'));
-      $("#tipo_user").text($(this).data('tipo'));
-      $("#email_user").text($(this).data('email'));
-      $("#pass_user").text($(this).data('password'));
-      $("#numcontrol_user").text($(this).data('numcontrol'));
-      $("#created_user").text($(this).data('created_at'));
-      $("#updated_user").text($(this).data('updated_at'));
+  //Function to place change differents items
+$(document).on('click', '.change-type', function(event){
+  event.preventDefault();
+  var id = $(this).attr('id');
+  
+  $.ajax({
+      url: "/user_change_type",
+      method: "get",
+      data: {id: id},
+      dataType: "json",
+      success:function(data){
+        $("#tipo_actual").val(data);
+        $("#userChangeTypeModal").modal('show');
+        $("#action_change_type").on('click', function(){
+          var user_type = $("#select_change_type").val();
+          $.ajaxSetup({
+            headers: {
+              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+          });
+          $.ajax({
+            url: "/user_type_move",
+            method: "post",
+            data: {id:id, user_type: user_type},
+            dataType: "json",
+            success:function(html){
+              $("#userChangeTypeModal").modal('hide');
+              $("#informationModal").modal('show');
+              if (html.success) {
+                $("#msj_information_modal").text(html.success);
+              }
+              if (html.error) {
+                $("#msj_information_modal").text(html.error);
+              }
+              $("#users_table").DataTable().ajax.reload();
+            }
+          });
+        });
+      }
     });
+
+});
+
 </script>
 
 @endsection

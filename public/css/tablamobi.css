@@ -29,7 +29,13 @@
       .table-rwd td:first-of-type:after {
         content: ""; }
   .table-rwd tr:hover {
-    background: rgba(181, 213, 144, 0.2); }
+    background: rgba(181, 213, 144, 0.5);
+    cursor: pointer;
+    }
+    .uno {
+    background: rgba(181, 213, 0, 0.5);
+    cursor: pointer;
+    }
   .table-rwd tr td:nth-child(2n) {
     background: rgba(181, 213, 144, 0.2); }
 
@@ -47,5 +53,6 @@
   .table-rwd tr:hover td:first-child {
     background: #1A8CFF;
     color: #fff; }
+  
   /*.table-rwd tr:nth-child(2) td:first-child {
     box-shadow: 0 -2.7em 0 -6px #1A8CFF, -6px -2.7em 0 -6px #1A8CFF; }*/  
