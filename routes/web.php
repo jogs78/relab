@@ -21,6 +21,7 @@ Route::get('/lugares/obtener_lugares', 'LugarController@getDataLugar')->name('lu
 Route::post('/lugares/agregar_lugar', 'LugarController@postDataLugar')->name('lugares.postdata');
 Route::get('/lugares/editar_lugar', 'LugarController@fetchDataLugar')->name('lugares.fetchdata');
 Route::get('/lugares/eliminar_lugar', 'LugarController@removeDataLugar')->name('lugares.removedata');
+Route::get('/lugares_destroyrev', 'LugarController@deleteRevsNLugar')->name('lugares.destroyrev');
 Route::get('/lugares/eliminar_varios_lugares','LugarController@massRemoveLugar')->name('lugares.massRemove');
 
 //Mobiliario Routes
@@ -46,6 +47,7 @@ Route::get('/rev_fetchdata/{id}', 'RevisionesController@fetchDataRev')->name('re
 Route::get('/rev_daterange/fetch_data/{id}', 'RevisionesController@fetch_data')->name('revdaterange.fetch_data');
 Route::get('/rev_ultimas', 'RevisionesController@revUltimasView')->name('rev.ultimas');
 Route::post('/rev_ultimas/load_more', 'RevisionesController@revUltimas')->name('rev.ultimasloadmore');
+Route::get('/rev_lugares', 'RevisionesController@allLugares')->name('rev.allLugares');
 
 //Notifications
 Route::post('/notify_revs','RevisionesController@notifyRevs')->name('rev.notify_revs');
@@ -65,6 +67,8 @@ Route::post('/user_type_move','UserController@moveType');
 Route::post('/users/search','UserController@search')->name('search');
 Route::get('/users_conected','UserController@conectedUsers');
 Route::resource('users', 'UserController');
+Route::get('/users_profile','UserController@profile');
+Route::get('/user_getprofile','UserController@getProfile')->name('users.getProfile');
 
 //Auth::routes();
 // Authentication Routes...

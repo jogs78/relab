@@ -43,14 +43,14 @@
             </div>
 
             <div class="enlaces" id="enlaces">
-                <a href="{{ url('/users') }}" class="btn-header"><i class="fas fa-users"></i></a>
-                <a href="{{ route('lugares.index') }}" class="btn-header"><i class="fas fa-map-marker-alt"></i></a>
-                <a href="#" id="enlace-salas" class="btn-header"><i class="fas fa-laptop"></i></a>
-                @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Revisor')
+                <a title="Usuarios" href="{{ url('/users') }}" class="btn-header"><i class="fas fa-users"></i></a>
+                <a title="Lugares" href="{{ route('lugares.index') }}" class="btn-header"><i class="fas fa-map-marker-alt"></i></a>
+                <!--<a title="Mobiliarios" href="#" id="enlace-salas" class="btn-header"><i class="fas fa-laptop"></i></a>-->
+                {{--@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Revisor')
                         
-                    <a href="#" id="enlace-mobi" class="btn-header"><i class="fas fa-mobile-alt"></i></a>
+                    <a title="Revisiones" href="#" id="enlace-mobi" class="btn-header"><i class="fas fa-mobile-alt"></i></a>
                         
-                @endif
+                @endif--}}
 
                 <a class="btn-header" href="{{ route('logout') }}"
                     onclick="event.preventDefault();
@@ -95,7 +95,7 @@
                     @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Revisor')
                     <h2>
                         <div class="dropdown">
-                            <a href="#" class="dropdown-toggle" id="drop-mundo" data-toggle="dropdown">
+                            <a title="Notificaciones" href="#" class="dropdown-toggle" id="drop-mundo" data-toggle="dropdown">
                             <i class="fas fa-globe-americas"></i><span class="badge count" style="background:red;position:relative;top:-15px;left:-10px;"></span>
                             </a>
                             <div class="dropdown-menu scrollable-menu" id="drop_notificaciones">
@@ -140,7 +140,7 @@
         @if(substr_compare($lugar->nombre, "Bodega", 0, 6) !== 0)
             <div class="cont-work programacion">
                 <div class="img-work">
-                    <a href="{{ route('mobis.show', $lugar->id) }}"><img src="{{ URL::to('/') }}/imguser/{{ $lugar->foto }}"></a>
+                    <a title="Ver Mobiliario y Equipo" href="{{ route('mobis.show', $lugar->id) }}"><img src="{{ URL::to('/') }}/imguser/{{ $lugar->foto }}"></a>
                 </div>
                 <div class="texto-work">
                     <h4>{{ $lugar->nombre }}</h4>
@@ -211,7 +211,7 @@
         @if(substr_compare($lugar->nombre, "Bodega", 0, 6) !== 0)
             <div class="cont-work programacion">
                 <div class="img-work">
-                    <a href="/revisiones/{{ $lugar->id }}"><img src="{{ URL::to('/') }}/imguser/{{ $lugar->foto }}" class="d-block w-100" style="width: 240px; height: 240px;"></a>
+                    <a title="Ver Revisiones" href="/revisiones/{{ $lugar->id }}"><img src="{{ URL::to('/') }}/imguser/{{ $lugar->foto }}" class="d-block w-100" style="width: 240px; height: 240px;"></a>
                 </div>
                 <div class="textos-work">
                     <h4>{{ $lugar->nombre }}</h4>

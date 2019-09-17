@@ -66,6 +66,8 @@
             <div class="capa"></div>
             <h1 class="title-description">Relab</h1>
             <p class="text-description">Sistema para el control de inventario del departamento de sistemas del Tecnológico Nacional de México Campus Tuxtla Gutiérrez, el uso de este software es de manera limitada a diferentes tipos usuarios, para más información contacte con el departamento de sistemas o con el desarrollador.</p>
+            <p class="text-description"><a href="/SistemaRevisiones.apk">Sistema</a></p>
+
         </div>
         
     </div>

@@ -5,6 +5,73 @@ $(document).on('click', '.edit-rev', function(event){
               verDetallesRevisiones(id)
 });
 
+//Function to know the quantity of each item
+function itemsQuantity(lugar_id){
+  let id = lugar_id
+  let all_mobi_html = ''
+
+  $.ajax({
+    url: '/cant_items',
+    method: 'get',
+    data: {id: id},
+    dataType: 'json',
+    success: function(data){
+      if(data.pc_cant != 0){
+        all_mobi_html += `<div class="col">
+        <p class="text-success text-justify">Computadoras Totales</p>
+        <p class="text-justify">`+data.pc_cant+`</p>
+        </div>`
+      }
+      if(data.mesa_cant != 0){
+        all_mobi_html += `<div class="col text-justify">
+        <p class="text-success text-justify">Mesas Totales</p>
+        <p class="text-justify">`+data.mesa_cant+`</p>
+        </div>`
+      }
+      if (data.silla_cant != 0) {
+        all_mobi_html += `<div class="col text-justify">
+        <p class="text-success text-justify">Sillas Totales</p>
+        <p class="text-justify">`+data.silla_cant+`</p>
+        </div>`
+      }
+      if (data.piz_cant != 0) {
+        all_mobi_html += `<div class="col text-justify">
+        <p class="text-success text-justify">Pizarrones Totales</p>
+        <p class="text-justify">`+data.piz_cant+`</p>
+        </div>`
+
+      }
+      if (data.television_cant != 0) {
+        all_mobi_html += `<div class="col text-justify">
+        <p class="text-success text-justify">Televisiones Totales</p>
+        <p class="text-justify">`+data.television_cant+`</p>
+        </div>`
+      }
+      if (data.termostato_cant != 0) {
+        all_mobi_html += `<div class="col text-justify">
+        <p class="text-success text-justify">Termostatos Totales</p>
+        <p class="text-justify">`+data.termostato_cant+`</p>
+        </div>`
+      }
+      if (data.ruteador_cant != 0) {
+        all_mobi_html += `<div class="col text-justify">
+        <p class="text-success text-justify">Ruteadores Totales</p>
+        <p class="text-justify">`+data.ruteador_cant+`</p>
+        </div>`
+      }
+      if (data.swith_cant != 0) {
+        all_mobi_html += `<div class="col text-justify">
+        <p class="text-success text-justify">Switches Totales</p>
+        <p class="text-justify">`+data.swith_cant+`</p>
+        </div>`
+      }
+      $("#cant_mobi_all").html(all_mobi_html)
+      $("#titleDetailsMobi").text('Cantidades en ')
+      $("#itemsCantModal").modal('show')
+    }
+  })
+}
+
 function verDetallesRevisiones(id){
   $.ajax({
                 url: "/rev_fetchdata/"+id,

@@ -16,6 +16,7 @@
     background: #000CFF;
     color: #fff; }
 </style>
+
 @endsection
 
 
@@ -29,8 +30,8 @@
         <img src="{{ asset('images/logo_ittg.png') }}" alt="">
       </div>
       <div class="enlaces" id="enlaces">
-        <a href="{{ url('/') }}" class="btn-header"><i class="fas fa-home"></i></a>
-        @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Prestador' || Auth::user()->tipo_usuario == 'Responsable')
+        <a title="Inicio" href="{{ url('/') }}" class="btn-header"><i class="fas fa-home"></i></a>
+        @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Prestador' || Auth::user()->tipo_usuario == 'Auxiliar')
           <a href="#" id="agregar_mobi" class="btn-header">Agregar Mobiliario o Equipo</a>
         @endif
                     
@@ -45,7 +46,7 @@
 <div class="textos">
   <h1>Mobiliario y Equipo</h1>
   <h2>
-    Estas en el {{ $lugar->nombre }}
+    Estás en el {{ $lugar->nombre }}
   </h2>
 </div>
 
@@ -69,7 +70,7 @@
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="myLargeModalLabel">Cantidades de Items Existentes</h5>
+        <h5 class="modal-title" id="myLargeModalLabel">Cantidades de Ítems Existentes</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -90,46 +91,47 @@
 
 <br>
 <div class="table-container">
-      <table id="mobis_table" class="table-rwd">
-        <thead>
-          <tr>
-            <th>Clasificación</th>
-            <th>Descripción</th>
-            <th>Modelo</th>
-            <th>Estado</th>
-            <th>Marca</th>
-            <th>Número Inventario</th>
-            <th>Número de Serie</th>
-            <th>Foto</th>
-            <th>Actualizado</th>
-            @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
-            <th>Cambiar Lugar</th>
-            @endif
-            @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
-            <th><button type="button" class="btn btn-danger float-right" id="move_all">Mover Varios</button></th>
-            @endif
-            @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Prestador' || Auth::user()->tipo_usuario == 'Responsable')
-            <th>
-              <a class="btn btn-success btn-sm" id="agregar_mobi_2">
-                <i class="fas fa-plus"></i> Agregar Nuevo
-              </a>
-            </th>
-            @endif
-            <!--<th><button type="button" class="btn btn-danger btn-xs" name="bulk_delete" id="bulk_delete_mobi"><i class="fas fa-user-times"></i></button></th>
+  <table id="mobis_table" class="table-rwd">
+    <thead>
+      <tr>
+        <th>Clasificación</th>
+        <th>Descripción</th>
+        <th>Modelo</th>
+        <th>Estado</th>
+        <th>Marca</th>
+        <th>N# Ítem o Máquina</th>
+        <th>Número de Serie</th>
+        <th>Foto</th>
+        <th>Actualizado</th>
+        @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Auxiliar')
+          <th>Cambiar Lugar</th>
+        @endif
+        @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Auxiliar')
+          <th>
+            <button type="button" class="btn btn-danger float-right" id="move_all">Mover Varios</button>
+          </th>
+        @endif
+        @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Prestador' || Auth::user()->tipo_usuario == 'Auxiliar')
+          <th>
+            <a class="btn btn-success btn-sm" id="agregar_mobi_2">
+              <i class="fas fa-plus"></i> Agregar Nuevo
+            </a>
+          </th>
+        @endif
+        <!--<th><button type="button" class="btn btn-danger btn-xs" name="bulk_delete" id="bulk_delete_mobi"><i class="fas fa-user-times"></i></button></th>
             <th></th>-->
-          </tr>
-        </thead>
+      </tr>
+    </thead>
         
-      </table>
+  </table>
 
-    </div>
+</div>
 
 
 {{-- Add form --}}
 <div class="modal fade" id="mobiAddModal" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
-
       <form method="post" id="mobi_store_form">
         <div class="modal-header">
           <h4 class="modal-title" id="modalTitleMobi"></h4>
@@ -173,11 +175,11 @@
             <input type="text" class="form-control" name="marca" id="marca" placeholder="Escribe la marca del Item">
           </div>
           <div class="form-group">
-            <label for="last_name">Número de Inventario</label>
-            <input type="text" class="form-control" name="numero_inventario" id="numero_inventario" placeholder="Escribe el número de inventario del Item">
+            <label for="last_name" id="nombrenummaq">Número de Ítem</label>
+            <input type="text" class="form-control" name="numero_inventario" id="numero_inventario" placeholder="Escribe el número de Ítem o Máquina según sea el caso">
           </div>
           <div class="form-group">
-            <label for="last_name">Número de Serie</label>
+            <label for="last_name" id="nombreseriecpu">Número de Serie</label>
             <input type="text" class="form-control" name="numero_serie" id="numero_serie" placeholder="Escribe el número de serie del Item" >
           </div>
           <div class="form-group" id="pc_data">
@@ -211,7 +213,7 @@
           <span id="form-output"></span>
           <div class="form-group">
             <label for="path">Foto</label>
-            <input type="hidden" class="form-control" name="path_edit" id="path_edit">
+            <input type="hidden" class="form-control" id="path_edit" name="path_edit">
             <input type="file" name="path_file_edit" id="path_edit_file">
             <span id="store_image_edit"></span>
           </div>
@@ -238,13 +240,14 @@
             <input type="text" class="form-control" name="marca_edit" id="marca_edit">
           </div>
           <div class="form-group">
-            <label for="last_name">Número de Inventario</label>
+            <label for="last_name" id="nombrenummaqedit">Número de Ítem</label>
             <input type="text" class="form-control" name="numero_inventario_edit" id="numero_inventario_edit">
           </div>
           <div class="form-group">
-            <label for="last_name">Número de Serie</label>
+            <label for="last_name" id="nombreseriecpuedit">Número de Serie</label>
             <input type="text" class="form-control" name="numero_serie_edit" id="numero_serie_edit">
           </div>
+          <input type="hidden" name="lugar_id_edit" id="lugar_id_edit" value="{{ $lugar->id }}">
           <div class="form-group" id="pc_data_edit">
           </div>
          
@@ -345,7 +348,7 @@
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title"></h4>
+          <h4 class="modal-title" id="titleDetailsMobi"></h4>
           <button type="button" class="close" data-dismiss="modal">&times;</button>
         </div>
         <div class="modal-body">
@@ -414,277 +417,272 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
 <script>
-  $(document).ready(function() {
+$(document).ready(function() {
 
-    let num_column = '';
+  let num_column = '';
 
-    alertaDePcs();
+  alertaDePcs();
 
-    function alertaDePcs(){
-      $("#modalTitleInfo").text("Indicaciones!");
-      $("#modalTitleInfo").addClass("text-danger");
-      $("#msj_information_modal").text("Si encuentras un recuadro rojo en el número de serie de las Pcs, significa que faltan datos, basta con actualizalos (botón editar) para corregirlos y así tener un mejor control del mismo, Gracias!");
-      $("#msj_information_modal").addClass("text-danger");
-      $("#informationModal").modal('show');
+  function alertaDePcs(){
+    $("#modalTitleInfo").text("Indicaciones!");
+    $("#modalTitleInfo").addClass("text-danger");
+    $("#msj_information_modal").text("Si encuentras un recuadro rojo en el número de serie de las Pcs, significa que faltan datos, basta con actualizalos (botón editar) para corregirlos y así tener un mejor control del mismo, Gracias!");
+    $("#msj_information_modal").addClass("text-danger");
+    $("#informationModal").modal('show');
+  }
+
+  var table = $('#mobis_table').DataTable({
+    "serverSide": true,
+    "ajax": "{{ route('mobis.lugarmobi', $lugar->id) }}",
+    "columns":[
+      {data: 'clasificacion'},
+      {data: 'descripcion'},
+      {data: 'modelo'},
+      {data: 'estado'},
+      {data: 'marca'},
+      {data: 'numero_inventario'},
+      {
+        data: 'numero_serie',
+        name: 'numero_serie',
+        render: function(data, type, full, meta){
+          var todo = [full]
+          for(var i = 0; i < todo.length; i++){
+            if (todo[i].numero_serie == 'undefined' || todo[i].numero_serie == '') {
+              return `<button class="btn btn-danger" style="width:100%;" disabled>Sin Pc</button>`
+            }else{
+              return todo[i].numero_serie;
+            }
+          }
+        }, orderable: false 
+      },
+      {
+        data: 'path',
+        name: 'path',
+        render: function(data, type, full, meta){
+          return '<img src="{{ URL::to('/') }}/imguser/'+data+'" width="70" class="img-tumbnail">'
+        }, orderable: false 
+      },
+      {data: 'updated_at'},
+
+    @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Auxiliar')
+      {
+        data: "change",
+        render: function(data, type, full, meta){
+          return data;
+        }, orderable:false, searchable:false
+      },
+    @endif
+    @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Auxiliar')
+      {data: "checkbox",
+        render: function(data, type, full, meta){
+          return data;
+        }, orderable:false, searchable:false
+      },
+    @endif
+    @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Prestador' || Auth::user()->tipo_usuario == 'Auxiliar')
+      {
+        data: 'action',
+          render: function(data, type, full, meta){
+            return data;
+          }, orderable:false, searchable:false
+      },
+    @endif
+    //{data: 'checkbox', orderable:false, searchable:false}
+    ],
+    "language": {
+    "info": "_TOTAL_ registros en total",
+    "search": "Buscar",
+    "paginate": {
+      "next": "Siguiente",
+      "previous": "Anterior"
+    },
+    "lengthMenu": 'Mostrar <select>'+
+      '<option value="10">10</option>'+
+      '<option value="30">30</option>'+
+      '<option value="-1">Todos</option>'+
+      '</select> registros',
+    "loadingRecords": "Cargando...",
+    "proccesing": "Procesando...",
+    "emptyTable": "No hay datos",
+    "zeroRecords": "No hay coincidencias",
+    "infoEmpty": "",
+    "infoFiltered": ""
     }
-
-            var table = $('#mobis_table').DataTable({
-                "serverSide": true,
-                "ajax": "{{ route('mobis.lugarmobi', $lugar->id) }}",
-                "columns":[
-                    {data: 'clasificacion'},
-                    {data: 'descripcion'},
-                    {data: 'modelo'},
-                    {data: 'estado'},
-                    {data: 'marca'},
-                    {data: 'numero_inventario'},
-                    {data: 'numero_serie',
-                     name: 'numero_serie',
-                     render: function(data, type, full, meta){
-                      var todo = [full]
-                      for(var i = 0; i < todo.length; i++){
-                        if (todo[i].numero_serie == 'undefined' || todo[i].numero_serie == '') {
-                          return `<button class="btn btn-danger" style="width:100%;" disabled>Sin Pc</button>`
-                        }else{
-                          return todo[i].numero_serie;
-                        }
-                      }
-                      },
-                      orderable: false
-                    },
-                    {
-                      data: 'path',
-                      name: 'path',
-                      render: function(data, type, full, meta){
-                        return '<img src="{{ URL::to('/') }}/imguser/'+data+'" width="70" class="img-tumbnail">'
-                      },
-                      orderable: false
-                    },
-                    {data: 'updated_at'},
-                    @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
-                    {data: "change",
-                      render: function(data, type, full, meta){
-                        return data;
-                      },
-                    orderable:false, searchable:false},
-                    @endif
-                    @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
-                    {data: "checkbox",
-                      render: function(data, type, full, meta){
-                        return data;
-                      },
-                    orderable:false, searchable:false},
-                    @endif
-                    @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Prestador' || Auth::user()->tipo_usuario == 'Responsable')
-                    {data: 'action',
-                      render: function(data, type, full, meta){
-                        return data;
-                      },
-                      orderable:false, searchable:false},
-                      @endif
-                    //{data: 'checkbox', orderable:false, searchable:false}
-                ],
-                "language": {
-                    "info": "_TOTAL_ registros en total",
-                    "search": "Buscar",
-                    "paginate": {
-                        "next": "Siguiente",
-                        "previous": "Anterior"
-                    },
-                    "lengthMenu": 'Mostrar <select>'+
-                                '<option value="10">10</option>'+
-                                '<option value="30">30</option>'+
-                                '<option value="-1">Todos</option>'+
-                                '</select> registros',
-                    "loadingRecords": "Cargando...",
-                    "proccesing": "Procesando...",
-                    "emptyTable": "No hay datos",
-                    "zeroRecords": "No hay coincidencias",
-                    "infoEmpty": "",
-                    "infoFiltered": ""
-                }
-            });
-
-
-            $('#mobis_table').on('click','td', function () {
-                var col = $(this).parent().children().index($(this));
-                num_column = col;
-              })
-
-            $('#mobis_table').on('click', 'tr', function () {
-              if (num_column <= 8) {
-                var data = table.row( this ).data();
-                var id = data.id
-
-                $.ajaxSetup({
-                  headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                  }
-                });
-                $.ajax({
-                  url: "{{ route('mobi.detail') }}",
-                  method: "post",
-                  data: {id: id},
-                  dataType: "json",
-                  success: function(res){
-                    let html_pc = ''
-                    if (res.mobi.clasificacion != "Pc") {
-                      if (res.user_add != null) {
-                        $("#user_id_show").val(res.user_add.nombre+' '+res.user_add.apellido)
-                      }else{
-                        $("#user_id_show").val('Cristian R.')
-                      }
-                      if (res.user_edit != null) {
-                        $("#user_edit_show").val(res.user_edit.nombre)
-                      }else{
-                        $("#user_edit_show").val('Nadie')
-                      }
-                      if (res.mobi.path != null) {
-                        $("#path_show").html('<img src="{{ URL::to('/') }}/imguser/'+res.mobi.path+'" style="width:100%;" class="img-thumbnail" alt="">')
-                      }else{
-                        $("#path_show").html('<img src="/images/mobi1.jpg" class="img-thumbnail" style="width:100%;" alt="">')
-                      }
-                      $("#clasificacion_show").val(res.mobi.clasificacion)
-                      $("#modelo_show").val(res.mobi.modelo)
-                      $("#marca_show").val(res.mobi.marca)
-                      $('#numero_inv_show').val(res.mobi.numero_inventario)
-                      $("#numero_serie_show").val(res.mobi.numero_serie)
-                      $("#estado_show").val(res.mobi.estado)
-                      $("#descripcion_show").val(res.mobi.descripcion)
-                      $("#created_at_show").val(res.mobi.created_at)
-                      $("#updated_at_show").val(res.mobi.updated_at)
-
-                      $(".modal-title").text('Detalle de '+res.mobi.clasificacion)
-                      $("#mobiInfoModal").modal('show')
-                    }else{
-                      
-                      if (res.pc == null || res.pc.num_serie_cpu == 'undefined' || res.pc.num_serie_cpu == '') {
-                        $("#colorInfModal").addClass("p-3 mb-2 bg-danger text-white");
-                        $("#modalTitleInfo").text("¡Error!");
-                        $("#msj_information_modal").text("Ups hubo un error al consultar la Pc, solo da click en el botón editar para completar los campos que faltan. Gracias!");
-                        $("#informationModal").modal('show');
-
-                      }else{
-
-                        if (res.user_add != null) {
-                          $("#user_id_show").val(res.user_add.nombre+' '+res.user_add.apellido)
-                        }else{
-                          $("#user_id_show").val('Cristian R.')
-                        }
-                        if (res.user_edit != null) {
-                          $("#user_edit_show").val(res.user_edit.nombre)
-                        }else{
-                          $("#user_edit_show").val('Nadie')
-                        }
-                        if (res.mobi.path != null) {
-                          $("#path_show").html('<img src="{{ URL::to('/') }}/imguser/'+res.mobi.path+'" style="width:100%;" class="img-thumbnail" alt="">')
-                        }else{
-                          $("#path_show").html('<img src="/images/mobi1.jpg" class="img-thumbnail" style="width:100%;" alt="">')
-                        }
-                        $("#clasificacion_show").val(res.mobi.clasificacion)
-                        $("#modelo_show").val(res.mobi.modelo)
-                        $("#marca_show").val(res.mobi.marca)
-                        $('#numero_inv_show').val(res.mobi.numero_inventario)
-                        $("#numero_serie_show").val(res.pc.num_serie_cpu)
-                        $("#estado_show").val(res.mobi.estado)
-                        $("#descripcion_show").val(res.mobi.descripcion)
-                        $("#created_at_show").val(res.mobi.created_at)
-                        $("#updated_at_show").val(res.mobi.updated_at)
-
-                        html_pc += `
-                          <div class="row">
-                            <div class="col-md-4">
-                              <label for="user_id_edit">Número de maquina</label>
-                              <input type="text" class="form-control" value="`+res.pc.num_maquina+`" disabled>
-                              <label for="first_name">Tiene Cámara?</label>`
-                              if (res.pc.tiene_camara == 1) {
-                                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
-                              }else{
-                                html_pc += '<input type="text" class="form-control" value="No" disabled>'
-                              }
-                              html_pc += '<label for="first_name">Tiene Bocinas?</label>'
-                              if (res.pc.tiene_bocinas == 1) {
-                                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
-                              }else{
-                                html_pc += '<input type="text" class="form-control" value="No" disabled>'
-                              }
-                              html_pc += `<label for="tipo_edit">Cantidad de RAM</label>
-                              <input type="text" class="form-control" value="`+res.pc.ram+`" disabled>
-                              <label for="user_id_edit">Paquetería Office</label>
-                              <input type="text" class="form-control" value="`+res.pc.paq_office_version+`" disabled>
-                            </div>
-                            <div class="col-md-4">
-                              <label for="user_id_edit">Cantidad de Disco Duro</label>
-                              <input type="text" class="form-control" value="`+res.pc.disco_duro+`" disabled>
-                              <label for="user_id_edit">Sistema Operativo</label>
-                              <input type="text" class="form-control" value="`+res.pc.sistema_operativo+`" disabled>`;
-                              html_pc += '<label for="first_name">Sistema Opertivo Activado?</label>'
-                              if (res.pc.sistema_operativo_activado == 1) {
-                                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
-                              }else{
-                                html_pc += '<input type="text" class="form-control" value="No" disabled>'
-                              }
-                              html_pc += '<label for="first_name">Tiene Cable VGA?</label>'
-                              if (res.pc.cable_vga == 1) {
-                                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
-                              }else{
-                                html_pc += '<input type="text" class="form-control" value="No" disabled>'
-                              }
-                              html_pc += '<label for="first_name">Paquetería Office Activado?</label>'
-                              if (res.pc.paq_office_activado == 1) {
-                                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
-                              }else{
-                                html_pc += '<input type="text" class="form-control" value="No" disabled>'
-                              }
-                            html_pc += `</div>
-                            <div class="col-md-4">`;
-                              html_pc += '<label for="first_name">Tiene Monitor?</label>'
-                              if (res.pc.tiene_monitor == 1) {
-                                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
-                              }else{
-                                html_pc += '<input type="text" class="form-control" value="No" disabled>'
-                              }
-                            html_pc += `<label for="user_id_edit">Número de Serie del Monitor</label>
-                              <input type="text" class="form-control" value="`+res.pc.num_serie_monitor+`" disabled>`
-                              html_pc += '<label for="first_name">Tiene Teclado?</label>'
-                              if (res.pc.tiene_teclado == 1) {
-                                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
-                              }else{
-                                html_pc += '<input type="text" class="form-control" value="No" disabled>'
-                              }
-                              html_pc += '<label for="first_name">Tiene Ratón?</label>'
-                              if (res.pc.tiene_raton == 1) {
-                                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
-                              }else{
-                                html_pc += '<input type="text" class="form-control" value="No" disabled>'
-                              }
-                              html_pc += '<label for="first_name">Tiene Controlador de Red?</label>'
-                              if (res.pc.controlador_red == 1) {
-                                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
-                              }else{
-                                html_pc += '<input type="text" class="form-control" value="No" disabled>'
-                              }
-                              html_pc += `</div>
-                          </div>
-                          <div class="row">
-                            <label for="user_id_edit">Observaciones</label>
-                              <input type="text" class="form-control" value="`+res.pc.observaciones+`" disabled>
-                          </div>`
-
-                          $("#pc_detail_show").html(html_pc)
-
-                          $(".modal-title").text('Detalle de '+res.mobi.clasificacion)
-                          $("#mobiInfoModal").modal('show')
-                      }
-                    }
-                  }
-                })
-
-              }
-                
-            } );
-
   });
+
+
+  $('#mobis_table').on('click','td', function () {
+    var col = $(this).parent().children().index($(this));
+    num_column = col;
+  });
+
+  $('#mobis_table').on('click', 'tr', function () {
+    if (num_column <= 8) {
+      $("#mobis_table tr").attr("title", "Ver detalles");
+      var data = table.row( this ).data();
+      var id = data.id;
+
+      $.ajaxSetup({
+        headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      $.ajax({
+        url: "{{ route('mobi.detail') }}",
+        method: "post",
+        data: {id: id},
+        dataType: "json",
+        success: function(res){
+          let html_pc = '';
+          if (res.mobi.clasificacion != "Pc") {
+            if (res.user_add != null) {
+              $("#user_id_show").val(res.user_add.nombre+' '+res.user_add.apellido)
+            }else{
+              $("#user_id_show").val('Cristian R.')
+            }
+            if (res.user_edit != null) {
+              $("#user_edit_show").val(res.user_edit.nombre)
+            }else{
+              $("#user_edit_show").val('Nadie')
+            }
+            if (res.mobi.path != null) {
+              $("#path_show").html('<img src="{{ URL::to('/') }}/imguser/'+res.mobi.path+'" style="width:100%;" class="img-thumbnail" alt="">')
+            }else{
+              $("#path_show").html('<img src="/images/mobi1.jpg" class="img-thumbnail" style="width:100%;" alt="">')
+            }
+            $("#clasificacion_show").val(res.mobi.clasificacion)
+            $("#modelo_show").val(res.mobi.modelo)
+            $("#marca_show").val(res.mobi.marca)
+            $('#numero_inv_show').val(res.mobi.numero_inventario)
+            $("#numero_serie_show").val(res.mobi.numero_serie)
+            $("#estado_show").val(res.mobi.estado)
+            $("#descripcion_show").val(res.mobi.descripcion)
+            $("#created_at_show").val(res.mobi.created_at)
+            $("#updated_at_show").val(res.mobi.updated_at)
+            $("#titleDetailsMobi").text('Detalle de '+res.mobi.clasificacion)
+            $("#mobiInfoModal").modal('show')
+          }else{              
+            if (res.pc == null || res.pc.num_serie_cpu == 'undefined' || res.pc.num_serie_cpu == '') {
+              $("#colorInfModal").addClass("p-3 mb-2 bg-danger text-white");
+              $("#modalTitleInfo").text("¡Error!");
+              $("#msj_information_modal").text("Ups hubo un error al consultar la Pc, solo da click en el botón editar para completar los campos que faltan. Gracias!");
+              $("#informationModal").modal('show');
+            }else{
+              if (res.user_add != null) {
+                $("#user_id_show").val(res.user_add.nombre+' '+res.user_add.apellido)
+              }else{
+                $("#user_id_show").val('Cristian R.')
+              }
+              if (res.user_edit != null) {
+                $("#user_edit_show").val(res.user_edit.nombre)
+              }else{
+                $("#user_edit_show").val('Nadie')
+              }
+              if (res.mobi.path != null) {
+                $("#path_show").html('<img src="{{ URL::to('/') }}/imguser/'+res.mobi.path+'" style="width:100%;" class="img-thumbnail" alt="">')
+              }else{
+                $("#path_show").html('<img src="/images/mobi1.jpg" class="img-thumbnail" style="width:100%;" alt="">')
+              }
+              $("#clasificacion_show").val(res.mobi.clasificacion)
+              $("#modelo_show").val(res.mobi.modelo)
+              $("#marca_show").val(res.mobi.marca)
+              $('#numero_inv_show').val(res.mobi.numero_inventario)
+              $("#numero_serie_show").val(res.pc.num_serie_cpu)
+              $("#estado_show").val(res.mobi.estado)
+              $("#descripcion_show").val(res.mobi.descripcion)
+              $("#created_at_show").val(res.mobi.created_at)
+              $("#updated_at_show").val(res.mobi.updated_at)
+              html_pc += `
+              <div class="row">
+              <div class="col-md-4">
+              <label for="user_id_edit">Número de maquina</label>
+              <input type="text" class="form-control" value="`+res.pc.num_maquina+`" disabled>
+              <label for="first_name">Tiene Cámara?</label>`
+              if (res.pc.tiene_camara == 1) {
+                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
+              }else{
+                html_pc += '<input type="text" class="form-control" value="No" disabled>'
+              }
+              html_pc += '<label for="first_name">Tiene Bocinas?</label>'
+              if (res.pc.tiene_bocinas == 1) {
+                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
+              }else{
+                html_pc += '<input type="text" class="form-control" value="No" disabled>'
+              }
+              html_pc += `<label for="tipo_edit">Cantidad de RAM</label>
+              <input type="text" class="form-control" value="`+res.pc.ram+`" disabled>
+              <label for="user_id_edit">Paquetería Office</label>
+              <input type="text" class="form-control" value="`+res.pc.paq_office_version+`" disabled>
+              </div>
+              <div class="col-md-4">
+              <label for="user_id_edit">Cantidad de Disco Duro</label>
+              <input type="text" class="form-control" value="`+res.pc.disco_duro+`" disabled>
+              <label for="user_id_edit">Sistema Operativo</label>
+              <input type="text" class="form-control" value="`+res.pc.sistema_operativo+`" disabled>`;
+              html_pc += '<label for="first_name">Sistema Opertivo Activado?</label>'
+              if (res.pc.sistema_operativo_activado == 1) {
+                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
+              }else{
+                html_pc += '<input type="text" class="form-control" value="No" disabled>'
+              }
+              html_pc += '<label for="first_name">Tiene Cable VGA?</label>'
+              if (res.pc.cable_vga == 1) {
+                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
+              }else{
+                html_pc += '<input type="text" class="form-control" value="No" disabled>'
+              }
+              html_pc += '<label for="first_name">Paquetería Office Activado?</label>'
+              if (res.pc.paq_office_activado == 1) {
+                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
+              }else{
+                html_pc += '<input type="text" class="form-control" value="No" disabled>'
+              }
+              html_pc += `</div>
+              <div class="col-md-4">`;
+              html_pc += '<label for="first_name">Tiene Monitor?</label>'
+              if (res.pc.tiene_monitor == 1) {
+                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
+              }else{
+                html_pc += '<input type="text" class="form-control" value="No" disabled>'
+              }
+              html_pc += `<label for="user_id_edit">Número de Serie del Monitor</label>
+              <input type="text" class="form-control" value="`+res.pc.num_serie_monitor+`" disabled>`
+              html_pc += '<label for="first_name">Tiene Teclado?</label>'
+              if (res.pc.tiene_teclado == 1) {
+                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
+              }else{
+                html_pc += '<input type="text" class="form-control" value="No" disabled>'
+              }
+              html_pc += '<label for="first_name">Tiene Ratón?</label>'
+              if (res.pc.tiene_raton == 1) {
+                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
+              }else{
+                html_pc += '<input type="text" class="form-control" value="No" disabled>'
+              }
+              html_pc += '<label for="first_name">Tiene Controlador de Red?</label>'
+              if (res.pc.controlador_red == 1) {
+                html_pc += '<input type="text" class="form-control" value="Si" disabled>'
+              }else{
+                html_pc += '<input type="text" class="form-control" value="No" disabled>'
+              }
+              html_pc += `</div>
+              </div>
+              <div class="row">
+              <label for="user_id_edit">Observaciones</label>
+              <input type="text" class="form-control" value="`+res.pc.observaciones+`" disabled>
+              </div>`
+              $("#pc_detail_show").html(html_pc)
+              $("#titleDetailsMobi").text('Detalle de '+res.mobi.clasificacion)
+              $("#mobiInfoModal").modal('show')
+            }
+          }
+        }
+      });
+    }              
+  });
+
+});
+
 </script>
 
 <script type="text/javascript" src="{{ URL::asset('js/mobiliarioyequipo/mobi.js') }}"></script>

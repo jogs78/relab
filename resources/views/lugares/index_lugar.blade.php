@@ -50,7 +50,7 @@
 @section('content')
 	
 	<div class="container">
-		@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
+		@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Auxiliar')
 		<div class="right">
 			<button type="button" name="agregar_lugar" id="agregar_lugar" class="btn btn-success btn-sm">Agregar Nuevo Lugar</button>
 		</div>
@@ -64,10 +64,10 @@
 				<th>Agregó</th>
 				<th>Actualizó</th>
 				<th>Actualizado</th>
-				@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
+				@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Auxiliar')
 				<th>Opciones</th>
 				@endif
-				@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
+				@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Auxiliar')
 				<th>Eliminar multiples <button type="button" class="btn btn-danger btn-xs" name="bulk_delete" id="bulk_delete_lugar"><i class="fas fa-trash-alt"></i></button></th>
 				@endif
 			</tr>
@@ -193,14 +193,14 @@
 				 "name": "user_add"},
 				{"data": "user_edit"},
 				{ "data" : "updated_at"},
-				@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
+				@if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Auxiliar')
 				{ "data" : "action",
                       render: function(data, type, full, meta){
                         return data;
                       },
                    orderable:false, searchable:false},
                 @endif
-                @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Responsable')
+                @if(Auth::user()->tipo_usuario == 'Jefe' || Auth::user()->tipo_usuario == 'Auxiliar')
 				{ "data" : "checkbox", orderable:false, searchable:false}
 				@endif
 			],
@@ -309,14 +309,39 @@
 					method: "get",
 					data: {id: id},
 					success: function(data){
-						$("#confirmation_modal").modal('hide');
-						$("#lugares_table").DataTable().ajax.reload();
-						$("#informationModal").modal('show');
-						$("#msj_information_modal").text(data);
+						if (data != 1) {
+							$("#confirmation_modal").modal('hide');
+							$("#lugares_table").DataTable().ajax.reload();
+							$("#informationModal").modal('show');
+							$("#msj_information_modal").text(data);
+						}else{
+							$("#confirmation_modal").modal('show');
+							$("#modalTitleDelete").text('Eliminar Lugar');
+							$("#msj_confirmation_modal").text('Desea Continuar?');
+							$("#msj_confirmation_modal2").text('Se ELIMINARAN todas las revisiones de este lugar');
+							$("#confirm_yes").on('click', function(){
+								deleteRevNLugar(id);
+							});
+						}
 					}
 				});
 			});
 		});
+
+		function deleteRevNLugar(id_lugar){
+			var id = id_lugar;
+			$.ajax({
+					url: "{{ route('lugares.destroyrev') }}",
+					method: "get",
+					data: {id: id},
+					success: function(data){
+							$("#confirmation_modal").modal('hide');
+							$("#lugares_table").DataTable().ajax.reload();
+							$("#informationModal").modal('show');
+							$("#msj_information_modal").text(data);
+					}
+				});
+		}
 
 //Function to delete multiples lugares to the same time
 		$(document).on('click','#bulk_delete_lugar', function(){
@@ -337,10 +362,20 @@
 							method: "get",
 							data: {id: id},
 							success: function(data){
-								$("#confirmation_modal").modal('hide');
-								$("#lugares_table").DataTable().ajax.reload();
-								$("#informationModal").modal('show');
-								$("#msj_information_modal").text(data);
+								if (data != 1) {
+									$("#confirmation_modal").modal('hide');
+									$("#lugares_table").DataTable().ajax.reload();
+									$("#informationModal").modal('show');
+									$("#msj_information_modal").text(data);
+								}else{
+									$("#confirmation_modal").modal('show');
+									$("#modalTitleDelete").text('Eliminar Lugar');
+									$("#msj_confirmation_modal").text('Desea Continuar?');
+									$("#msj_confirmation_modal2").text('Se ELIMINARAN todas las revisiones de este lugar');
+									$("#confirm_yes").on('click', function(){
+										deleteRevNLugar(id);
+									});
+						}
 							}
 						});
 					});

@@ -60,7 +60,38 @@
 
 
 @section('content')
+  <br>
+  <div class="container">
+  <div class="row">
+    <div class="col">
+      <button type="button" class="btn btn-success float-right" onClick="itemsQuantity({{ $lugares->id }})">Ver Cantidades por Ítems</button>
+    </div>
+  </div>
+</div>
 
+<!-- Cantidades de Items -->
+<div class="modal fade bd-example-modal-lg" id="itemsCantModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="myLargeModalLabel">Cantidades de Ítems Existentes</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+          <div class="row justify-content-center" id="cant_mobi_all">
+            
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
   <div class="row align-items-center justify-content-center">
             <div class="col-md-5">

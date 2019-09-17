@@ -54,11 +54,12 @@ class MobiController extends Controller
 
     public function addMobiliario(Request $request){
         $clasi = $request->clasificacion;
+        $lugar_id = $request->lugar_id;
 
         if($clasi != ''){
-//This if is to know, if the item is Pc or something different
-        if ($clasi == 'Pc') {
-            $rules = array(
+            //This if is to know, if the item is Pc or something different
+            if ($clasi == 'Pc') {
+                $rules = array(
                     'descripcion' => 'required',
                     'modelo' => 'required',
                     'estado' => 'required',
@@ -66,7 +67,6 @@ class MobiController extends Controller
                     'numero_inventario' => 'required',
                     'numero_serie' => 'required',
                     'foto' => 'image|mimes:jpeg,jpg,png,gif|max:2048',
-                    'num_maquina' => 'required',
                     'ram' => 'required',
                     'disco_duro' => 'required',
                     'sistema_operativo' => 'required',
@@ -74,79 +74,98 @@ class MobiController extends Controller
                     'paq_office_version' => 'required',
                 );
 
-        $error = Validator::make($request->all(), $rules);
+                $error = Validator::make($request->all(), $rules);
 
-        if ($error->fails()) {
-            return response()->json(['errors' => $error->errors()->all()]);
-        }
+                if ($error->fails()) {
+                    return response()->json(['errors' => $error->errors()->all()]);
+                }
 
-        $image = $request->file('foto');
+                /*$item_lugar = Item::where('lugar_id',$lugar_id)->get();
+
+                foreach ($item_lugar as $item_lug) {
+                    //Verificar que no sean iguales
+                    if ($item_lug->numero_inventario == $request->numero_inventario || $item_lug->numero_serie == $request->numero_serie) {
+
+                        return response()->json(['err_ns' => "Error número de máquina o serie repetido en este lugar"]);
+                    }
+                }*/
+                $all_items = Item::all();
+                foreach ($all_items as $a_i) {
+                    if ($a_i->numero_inventario == $request->numero_inventario) {
+                        return response()->json(['err_ns' => "Error número de máquina"]);
+                        if ($a_i->numero_inventario == $request->numero_serie) {
+                            return response()->json(['err_ns' => "Error número de serie"]);
+                        }
+                    }
+                }
+
+                $image = $request->file('foto');
         
-        if ($image != '') {
-            $image_name = Carbon::now()->second.rand() . '.' . $image->getClientOriginalExtension();
-            \Storage::disk('local')->put($image_name, \File::get($image));
+                        if ($image != '') {
+                            $image_name = Carbon::now()->second.rand() . '.' . $image->getClientOriginalExtension();
+                            \Storage::disk('local')->put($image_name, \File::get($image));
 
-            $form_data_item = array(
-                    'path' => $image_name,
-                    'clasificacion' => $request->clasificacion,
-                    'descripcion' => $request->descripcion,
-                    'modelo' => $request->modelo,
-                    'estado' => $request->estado,
-                    'marca' => $request->marca,
-                    'numero_inventario' => $request->numero_inventario,
-                    'numero_serie' => $request->numero_serie,
-                    'lugar_id' => $request->lugar_id,
-                    'user_id' => $request->user_id_mobi
-            );
+                            $form_data_item = array(
+                                'path' => $image_name,
+                                'clasificacion' => $request->clasificacion,
+                                'descripcion' => $request->descripcion,
+                                'modelo' => $request->modelo,
+                                'estado' => $request->estado,
+                                'marca' => $request->marca,
+                                'numero_inventario' => $request->numero_inventario,
+                                'numero_serie' => $request->numero_serie,
+                                'lugar_id' => $request->lugar_id,
+                                'user_id' => $request->user_id_mobi
+                            );
 
-        }else{
-            $form_data_item = array(
-                    'clasificacion' => $request->clasificacion,
-                    'descripcion' => $request->descripcion,
-                    'modelo' => $request->modelo,
-                    'estado' => $request->estado,
-                    'marca' => $request->marca,
-                    'numero_inventario' => $request->numero_inventario,
-                    'numero_serie' => $request->numero_serie,
-                    'lugar_id' => $request->lugar_id,
-                    'user_id' => $request->user_id_mobi
-            );
-        }
+                        }else{
+                            $form_data_item = array(
+                                'clasificacion' => $request->clasificacion,
+                                'descripcion' => $request->descripcion,
+                                'modelo' => $request->modelo,
+                                'estado' => $request->estado,
+                                'marca' => $request->marca,
+                                'numero_inventario' => $request->numero_inventario,
+                                'numero_serie' => $request->numero_serie,
+                                'lugar_id' => $request->lugar_id,
+                                'user_id' => $request->user_id_mobi
+                            );
+                        }
+                
+                        Item::create($form_data_item);
         
-        Item::create($form_data_item);
+                $item_id = DB::table('items')
+                    ->select('id')
+                    ->orderBy('created_at', 'desc')
+                    ->first();
 
-        
-        $item_id = DB::table('items')
-            ->select('id')
-            ->orderBy('created_at', 'desc')
-            ->first();
+                
+                $form_data_pc = array(
+                            'item_id' => $item_id->id,
+                            'num_maquina' => $item_id->numero_inventario,
+                            'tiene_camara' => $request->tiene_camara,
+                            'tiene_bocinas' => $request->tiene_bocinas,
+                            'num_serie_cpu' => $item_id->numero_serie,
+                            'ram' => $request->ram,
+                            'disco_duro' => $request->disco_duro,
+                            'sistema_operativo' => $request->sistema_operativo,
+                            'sistema_operativo_activado' => $request->sistema_operativo_activado,
+                            'cable_vga' => $request->cable_vga,
+                            'tiene_monitor' => $request->tiene_monitor,
+                            'num_serie_monitor' => $request->num_serie_monitor,
+                            'tiene_teclado' => $request->tiene_teclado,
+                            'tiene_raton' => $request->tiene_raton,
+                            'controlador_red' => $request->controlador_red,
+                            'paq_office_version' => $request->paq_office_version,
+                            'paq_office_activado' => $request->paq_office_activado,
+                            'observaciones' => $request->observaciones
+                        );
 
-        $form_data_pc = array(
-                    'item_id' => $item_id->id,
-                    'num_maquina' => $request->num_maquina,
-                    'tiene_camara' => $request->tiene_camara,
-                    'tiene_bocinas' => $request->tiene_bocinas,
-                    'num_serie_cpu' => $request->numero_serie,
-                    'ram' => $request->ram,
-                    'disco_duro' => $request->disco_duro,
-                    'sistema_operativo' => $request->sistema_operativo,
-                    'sistema_operativo_activado' => $request->sistema_operativo_activado,
-                    'cable_vga' => $request->cable_vga,
-                    'tiene_monitor' => $request->tiene_monitor,
-                    'num_serie_monitor' => $request->num_serie_monitor,
-                    'tiene_teclado' => $request->tiene_teclado,
-                    'tiene_raton' => $request->tiene_raton,
-                    'controlador_red' => $request->controlador_red,
-                    'paq_office_version' => $request->paq_office_version,
-                    'paq_office_activado' => $request->paq_office_activado,
-                    'observaciones' => $request->observaciones
-        );
-        
-        Pc::create($form_data_pc);
+                        Pc::create($form_data_pc);
 
-        }else{
+            }else{
 
-            $rules = array(
+                $rules = array(
                     'descripcion' => 'required',
                     'modelo' => 'required',
                     'estado' => 'required',
@@ -156,53 +175,73 @@ class MobiController extends Controller
                     'foto' => 'image|mimes:jpeg,jpg,png,gif|max:2048',
                 );
 
-        $error = Validator::make($request->all(), $rules);
+                $error = Validator::make($request->all(), $rules);
 
-        if ($error->fails()) {
-            return response()->json(['errors' => $error->errors()->all()]);
-        }
+                if ($error->fails()) {
+                    return response()->json(['errors' => $error->errors()->all()]);
+                }
 
-        $image = $request->file('foto');
-        if ($image != '') {
-            $image_name = Carbon::now()->second.rand() . '.' . $image->getClientOriginalExtension();
-            \Storage::disk('local')->put($image_name, \File::get($image));
+                /*$item_lugar = Item::where('lugar_id',$lugar_id)->get();
 
-            $form_data = array(
-                'path' => $image_name,
-                'clasificacion' => $request->clasificacion,
-                'descripcion' => $request->descripcion,
-                'modelo' => $request->modelo,
-                'estado' => $request->estado,
-                'marca' => $request->marca,
-                'numero_inventario' => $request->numero_inventario,
-                'numero_serie' => $request->numero_serie,
-                'lugar_id' => $request->lugar_id,
-                'user_id' => $request->user_id_mobi
-            );
+                foreach ($item_lugar as $item_lug) {
+                    if ($item_lug->numero_inventario == $request->numero_inventario || $item_lug->numero_serie == $request->numero_serie) {
 
-        }else{
-            $form_data = array(
-                'clasificacion' => $request->clasificacion,
-                'descripcion' => $request->descripcion,
-                'modelo' => $request->modelo,
-                'estado' => $request->estado,
-                'marca' => $request->marca,
-                'numero_inventario' => $request->numero_inventario,
-                'numero_serie' => $request->numero_serie,
-                'lugar_id' => $request->lugar_id,
-                'user_id' => $request->user_id_mobi
-            );
-        }
+                        return response()->json(['err_ns' => "Error número de máquina o serie repetido en este lugar"]);
+                    }
+                }*/
+                $all_items = Item::all();
+                foreach ($all_items as $a_i) {
+                    if ($a_i->numero_inventario == $request->numero_inventario) {
+                        return response()->json(['err_ns' => "Error número de ítem repetido"]);
+                        if ($a_i->numero_inventario == $request->numero_serie) {
+                            return response()->json(['err_ns' => "Error número de serie repetido"]);
+                        }
+                    }
+                }
 
-        Item::create($form_data);
+                $image = $request->file('foto');
+        
+                        if ($image != '') {
+                            $image_name = Carbon::now()->second.rand() . '.' . $image->getClientOriginalExtension();
+                            \Storage::disk('local')->put($image_name, \File::get($image));
 
-        }
+                            $form_data_item = array(
+                                'path' => $image_name,
+                                'clasificacion' => $request->clasificacion,
+                                'descripcion' => $request->descripcion,
+                                'modelo' => $request->modelo,
+                                'estado' => $request->estado,
+                                'marca' => $request->marca,
+                                'numero_inventario' => $request->numero_inventario,
+                                'numero_serie' => $request->numero_serie,
+                                'lugar_id' => $request->lugar_id,
+                                'user_id' => $request->user_id_mobi
+                            );
 
-        return response()->json(['success' => 'Mobiliario Agregado Correctamente']);
+                        }else{
+                            $form_data_item = array(
+                                'clasificacion' => $request->clasificacion,
+                                'descripcion' => $request->descripcion,
+                                'modelo' => $request->modelo,
+                                'estado' => $request->estado,
+                                'marca' => $request->marca,
+                                'numero_inventario' => $request->numero_inventario,
+                                'numero_serie' => $request->numero_serie,
+                                'lugar_id' => $request->lugar_id,
+                                'user_id' => $request->user_id_mobi
+                            );
+                        }
+                
+                        Item::create($form_data_item);
+
+            }
+
+            return response()->json(['success' => 'Mobiliario Agregado Correctamente']);
         
         }else{
             return response()->json(['cla' => 'Tienes que elegir una clasificación']);
         }
+
     }
 
     public function byLugar($id){
@@ -239,10 +278,10 @@ class MobiController extends Controller
 
         return DataTables::of($mobis)
             ->addColumn('change', function($mobi){
-                return '<a href="javascript:void(0)" class="btn btn-xs btn-success move-mobi" style="width:100%;" id="'. $mobi->id .'"><i class="fas fa-exchange-alt"></i></a>';
+                return '<a title="Cambiar Lugar" href="javascript:void(0)" class="btn btn-xs btn-success move-mobi" style="width:100%;" id="'. $mobi->id .'"><i class="fas fa-exchange-alt"></i></a>';
             })
             ->addColumn('action', function($mobi){
-                return '<a href="javascript:void(0)" class="btn btn-xs btn-info edit-mobi" id="'. $mobi->id .'"><i class="fas fa-edit"></i></a> <a href="#" class="btn btn-xs btn-danger delete-mobi" id="'. $mobi->id .'"><i class="fas fa-trash-alt"></i></a>';
+                return '<a title="Editar Mobiliario" href="javascript:void(0)" class="btn btn-xs btn-info edit-mobi" id="'. $mobi->id .'"><i class="fas fa-edit"></i></a> <a title="Eliminar Mobiliario" href="#" class="btn btn-xs btn-danger delete-mobi" id="'. $mobi->id .'"><i class="fas fa-trash-alt"></i></a>';
             })
             ->editColumn('numero_serie', function($mobi){
                 if ($mobi->clasificacion == 'Pc') {
@@ -256,7 +295,7 @@ class MobiController extends Controller
                     return $mobi->numero_serie;
                 }
             })
-            ->addColumn('checkbox', '<input type="checkbox" name="mobi_checkbox[]" class="form-check-input mobi_checkbox" value="{{ $id }}">')
+            ->addColumn('checkbox', '<input title="Seleccionar elementos a mover" type="checkbox" name="mobi_checkbox[]" class="form-check-input mobi_checkbox" value="{{ $id }}">')
             ->editColumn('updated_at', function(Item $mobi) {
                 if ($mobi->updated_at != '') {
                     return $mobi->updated_at->diffForHumans();   
@@ -270,9 +309,24 @@ class MobiController extends Controller
     }
 
     public function fetchDataMobiliario($id){
-            $mobi = Item::find($id);
+        $mobi = Item::find($id);
 
-            if ($mobi->clasificacion != 'Pc') {
+        if ($mobi->clasificacion != 'Pc') {
+            $output = array(
+                'id' => $mobi->id,
+                'path' => $mobi->path,
+                'clasificacion' => $mobi->clasificacion,
+                'descripcion' => $mobi->descripcion,
+                'modelo' => $mobi->modelo,
+                'estado' => $mobi->estado,
+                'marca' => $mobi->marca,
+                'numero_inventario' => $mobi->numero_inventario,
+                'numero_serie' => $mobi->numero_serie,
+            );   
+        }else{
+            $pc = Pc::where('item_id',$id)->first();
+            
+            if (!empty($pc)) {
                 $output = array(
                     'id' => $mobi->id,
                     'path' => $mobi->path,
@@ -283,59 +337,45 @@ class MobiController extends Controller
                     'marca' => $mobi->marca,
                     'numero_inventario' => $mobi->numero_inventario,
                     'numero_serie' => $mobi->numero_serie,
+                    'id_pc' => $pc->id,
+                    'num_maquina' => $pc->num_maquina,
+                    'tiene_camara' => $pc->tiene_camara,
+                    'tiene_bocinas' => $pc->tiene_bocinas,
+                    'num_serie_cpu' => $pc->num_serie_cpu,
+                    'ram' => $pc->ram,
+                    'disco_duro' => $pc->disco_duro,
+                    'sistema_operativo' => $pc->sistema_operativo,
+                    'sistema_operativo_activado' => $pc->sistema_operativo_activado,
+                    'cable_vga' => $pc->cable_vga,
+                    'tiene_monitor' => $pc->tiene_monitor,
+                    'num_serie_monitor' => $pc->num_serie_monitor,
+                    'tiene_teclado' => $pc->tiene_teclado,
+                    'tiene_raton' => $pc->tiene_raton,
+                    'controlador_red' => $pc->controlador_red,
+                    'paq_office_version' => $pc->paq_office_version,
+                    'paq_office_activado' => $pc->paq_office_activado,
+                    'observaciones' => $pc->observaciones
                 );   
             }else{
-                $pc = Pc::where('item_id',$id)->first();
-                if (!empty($pc)) {
-                    $output = array(
-                        'id' => $mobi->id,
-                        'path' => $mobi->path,
-                        'clasificacion' => $mobi->clasificacion,
-                        'descripcion' => $mobi->descripcion,
-                        'modelo' => $mobi->modelo,
-                        'estado' => $mobi->estado,
-                        'marca' => $mobi->marca,
-                        'numero_inventario' => $mobi->numero_inventario,
-                        'numero_serie' => $mobi->numero_serie,
-                        'id_pc' => $pc->id,
-                        'num_maquina' => $pc->num_maquina,
-                        'tiene_camara' => $pc->tiene_camara,
-                        'tiene_bocinas' => $pc->tiene_bocinas,
-                        'num_serie_cpu' => $pc->num_serie_cpu,
-                        'ram' => $pc->ram,
-                        'disco_duro' => $pc->disco_duro,
-                        'sistema_operativo' => $pc->sistema_operativo,
-                        'sistema_operativo_activado' => $pc->sistema_operativo_activado,
-                        'cable_vga' => $pc->cable_vga,
-                        'tiene_monitor' => $pc->tiene_monitor,
-                        'num_serie_monitor' => $pc->num_serie_monitor,
-                        'tiene_teclado' => $pc->tiene_teclado,
-                        'tiene_raton' => $pc->tiene_raton,
-                        'controlador_red' => $pc->controlador_red,
-                        'paq_office_version' => $pc->paq_office_version,
-                        'paq_office_activado' => $pc->paq_office_activado,
-                        'observaciones' => $pc->observaciones
-                    );   
-                }else{
-                    $output = array(
-                        'id' => $mobi->id,
-                        'path' => $mobi->path,
-                        'clasificacion' => $mobi->clasificacion,
-                        'descripcion' => $mobi->descripcion,
-                        'modelo' => $mobi->modelo,
-                        'estado' => $mobi->estado,
-                        'marca' => $mobi->marca,
-                        'numero_inventario' => $mobi->numero_inventario,
-                        'numero_serie' => $mobi->numero_serie
-                    );
-                }
+                $output = array(
+                    'id' => $mobi->id,
+                    'path' => $mobi->path,
+                    'clasificacion' => $mobi->clasificacion,
+                    'descripcion' => $mobi->descripcion,
+                    'modelo' => $mobi->modelo,
+                    'estado' => $mobi->estado,
+                    'marca' => $mobi->marca,
+                    'numero_inventario' => $mobi->numero_inventario,
+                    'numero_serie' => $mobi->numero_serie
+                );
             }
+        }
 
-            return response()->json($output);
+        return response()->json($output);
         
     }
 
-//Function to know the quantity of each item
+    //Function to know the quantity of each item
     public function itemsQuantity(Request $request){
         $lugar = Lugar::find($request->input('id'));
 
@@ -404,13 +444,46 @@ class MobiController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+ 
     public function update(Request $request){
+        $lugar_id = $request->input('lugar_id_edit');
 
         if ($request->get('clasificacion_edit') == 'Pc') {
 
             $image_name = $request->input('path_edit');
             $image = $request->file('path_file_edit');
 
+            /*$item_lugar = Item::where('lugar_id',$lugar_id)->get();
+
+            $conta_inv = 0;
+            $conta_ser = 0;
+
+                foreach ($item_lugar as $item_lug) {
+                    if ($item_lug->numero_inventario == $request->input('numero_inventario_edit')) {
+
+                        $conta_inv += 1;
+
+                        if ($item_lug->numero_serie == $request->input('numero_serie_edit')) {
+                            $conta_ser += 1;
+                        }
+                    }
+
+                    if ($conta_inv >= 2) {
+                            return response()->json(['err_ns' => "Error número de máquina repetido en este lugar"]);
+                        }
+                        if ($conta_ser >= 2) {
+                            return response()->json(['err_ns' => " Error número de serie repetido en este lugar"]);
+                        }
+                }*/
+                $all_items = Item::all();
+                foreach ($all_items as $a_i) {
+                    if ($a_i->numero_inventario == $request->input('numero_inventario_edit')) {
+                        return response()->json(['err_ns' => "Error número de máquina repetido"]);
+                        if ($a_i->numero_inventario == $request->input('numero_serie_edit')) {
+                           return response()->json(['err_ns' => "Error número de serie repetido"]);
+                        }
+                    }
+                }
             if ($image != '') {
 
                 $rules = array(
@@ -421,8 +494,8 @@ class MobiController extends Controller
                     'numero_inventario_edit' => 'required',
                     'numero_serie_edit' => 'required',
                     'path_file_edit' => 'required|image|mimes:jpeg,jpg,png,gif|max:2048',
-                    'num_maquina_edit' => 'required',
-                    'num_serie_cpu_edit' => 'required',
+                    //'num_maquina_edit' => 'required',
+                    //'num_serie_cpu_edit' => 'required',
                     'ram_edit' => 'required',
                     'disco_duro_edit' => 'required',
                     //'sistema_operativo_edit' => 'required',
@@ -446,8 +519,8 @@ class MobiController extends Controller
                     'marca_edit' => 'required',
                     'numero_inventario_edit' => 'required',
                     'numero_serie_edit' => 'required',
-                    'num_maquina_edit' => 'required',
-                    'num_serie_cpu_edit' => 'required',
+                    //'num_maquina_edit' => 'required',
+                    //'num_serie_cpu_edit' => 'required',
                     'ram_edit' => 'required',
                     'disco_duro_edit' => 'required',
                     //'sistema_operativo_edit' => 'required',
@@ -474,11 +547,12 @@ class MobiController extends Controller
                     $item->save();
 
                     $pc = Pc::find($request->input('pc_id_edit'));
+
                     if ($pc != null) {
-                        $pc->num_maquina = $request->get('num_maquina_edit');
+                        $pc->num_maquina = $request->input('numero_inventario_edit');
                         $pc->tiene_camara  = $request->get('tiene_camara_edit');
                         $pc->tiene_bocinas = $request->get('tiene_bocinas_edit');
-                        $pc->num_serie_cpu = $request->get('numero_serie_edit');
+                        $pc->num_serie_cpu = $request->input('numero_serie_edit');
                         $pc->ram = $request->get('ram_edit');
                         $pc->disco_duro = $request->input('disco_duro_edit');
                         $pc->sistema_operativo = $request->get('sistema_operativo_edit');
@@ -496,7 +570,7 @@ class MobiController extends Controller
                     }else{
                         $form_data_pc = array(
                             'item_id' => $item->id,
-                            'num_maquina' => $request->input('num_maquina_edit'),
+                            'num_maquina' => $request->input('numero_inventario_edit'),
                             'tiene_camara' => $request->get('tiene_camara_edit'),
                             'tiene_bocinas' => $request->get('tiene_bocinas_edit'),
                             'num_serie_cpu' => $request->input('numero_serie_edit'),
@@ -518,8 +592,40 @@ class MobiController extends Controller
                         Pc::create($form_data_pc);
                     }
 
-                    return response()->json(['success' => 'Mobiliario Actualizado Correctamente']);
+                    return response()->json(['success' => 'Pc Actualizado Correctamente']);
         }else{
+
+            /*$item_lugar = Item::where('lugar_id',$lugar_id)->get();
+
+            $conta_inv = 0;
+            $conta_ser = 0;
+
+                foreach ($item_lugar as $item_lug) {
+                    if ($item_lug->numero_inventario == $request->input('numero_inventario_edit')) {
+
+                        $conta_inv += 1;
+
+                        if ($item_lug->numero_serie == $request->input('numero_serie_edit')) {
+                            $conta_ser += 1;
+                        }
+                    }
+
+                    if ($conta_inv >= 2) {
+                            return response()->json(['err_ns' => "Error número de ítem repetido en este lugar"]);
+                        }
+                        if ($conta_ser >= 2) {
+                            return response()->json(['err_ns' => " Error número de serie repetido en este lugar"]);
+                        }
+                }*/
+                $all_items = Item::all();
+                foreach ($all_items as $a_i) {
+                    if ($a_i->numero_inventario == $request->input('numero_inventario_edit')) {
+                        return response()->json(['err_ns' => "Error número de ítem repetido"]);
+                        if ($a_i->numero_inventario == $request->input('numero_serie_edit')) {
+                           return response()->json(['err_ns' => "Error número de serie repetido"]);
+                        }
+                    }
+                }
 
             $image_name = $request->input('path_edit');
             $image = $request->file('path_file_edit');
@@ -534,14 +640,16 @@ class MobiController extends Controller
                     'numero_serie_edit' => 'required',
                     'path_file_edit' => 'required|image|mimes:jpeg,jpg,png,gif|max:2048',
                 );
+
                 $error = Validator::make($request->all(), $rules);
+
                 if ($error->fails()) {
                     return response()->json(['errors' => $error->errors()->all()]);
                 }
 
                 $image_name = Carbon::now()->second.rand() . '.' . $image->getClientOriginalExtension();
-            
-            \Storage::disk('local')->put($image_name, \File::get($image));
+                \Storage::disk('local')->put($image_name, \File::get($image));
+                
             }else{
                 $rules = array(
                     'descripcion_edit' => 'required',

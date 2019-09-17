@@ -103,6 +103,7 @@ class RevisionesController extends Controller
     {
         
     }
+
     public function fetchDataRev($id){
         $revision = Revision::find($id);
             
@@ -393,6 +394,11 @@ class RevisionesController extends Controller
         return view('revisiones.ultimas_revisiones');
     }
 
+    public function allLugares(){
+        $lugares = Lugar::all();
+        return response()->json($lugares);
+    }
+
     public function revUltimas(Request $request){
         if ($request->ajax()) {
 
@@ -446,17 +452,21 @@ class RevisionesController extends Controller
                             ->where('revision_id', $row->id)
                             ->get();
 
-                    
-                        //$item_num = Item::find($datos_det->item_id);
-                            //Clasificación: '.$item_num->clasificacion.'
+                        $array_item_id = array();
+
+                        //obtener los datos del item para comparar con el de la revisión
+                        $datos_item = Item::where('lugar_id', $row->lugar_id)->get();
+
+
                         $output .= '
                             <div class="card border-info mb-3 text-center">
                                 <div class="card-header" id="title_header"><h4>Revisión: '. $row->tipo.' - Lugar: '. $lugar->nombre .' </h4> </div>
                                     <div class="card-body text-info">
                                     <h4 class="card-title" id="title_body">Nombre del revisor: '. $revisor->nombre .' '.$revisor->apellido.'</h4>';
-                                    /*for ($i = 0; $i < count($datos_det); $i++) {
+                                    
+                                    for ($i = 0; $i < count($datos_det); $i++) {
                                         $output .= '<p class="card-text">Item: '.json_encode($array_item_id[$i]);
-                                    }*///.', Modelo: '.$item_num->modelo.', Estado: '.$item_num->estado.', Marca: '.$item_num->marca.', Número de inventario: '.$item_num->numero_inventario.', Número de Serie: '.$item_num->numero_serie.'</p>*/
+                                    }//.', Modelo: '.$item_num->modelo.', Estado: '.$item_num->estado.', Marca: '.$item_num->marca.', Número de inventario: '.$item_num->numero_inventario.', Número de Serie: '.$item_num->numero_serie.'</p>*/
                                     $output .= '<p class="card-text">Momento: '.$row->momento.' - Observaciones: '.$row->observaciones.'</p>
                                     <a href="#" class="btn btn-xs btn-info edit-rev col-md-4 right" id="'. $row->id .'">Ver Detalles <i class="fas fa-eye"></i></a>
                               </div>';
@@ -477,31 +487,91 @@ class RevisionesController extends Controller
                             ->where('revision_id', $row->id)
                             ->get();
                         
+                        $array_re_id = array();
                         $array_clas = array();
                         $array_cant = array();
+
                         foreach($datos_rap as $d_r) {
+                            $array_rev_id[] = $d_r->revision_id;
                             $array_clas[] = $d_r->clasificacion;
                             $array_cant[] = $d_r->cantidad;
                         }
-                        
-                        $output .= '
-                            <div class="card border-info mb-3 text-center">
-                                <div class="card-header" id="title_header"><h4>Revisión: '. $row->tipo.' - Lugar: '. $lugar->nombre .'</h4>  </div>
-                                    <div class="card-body text-info">
-                                    <h4 class="card-title" id="title_body">Nombre del revisor: '. $revisor->nombre .' '.$revisor->apellido.'</h4>
-                                    <p class="card-text"> Momento: '.$row->momento.' - Observaciones: '.$row->observaciones.'</p>';
+
+                        $anomalia_rev_si = "";
+                        $anomalia_rev_no = "";
                                 
-                               /*for ($i = 0; $i < count($datos_rap); $i++) {
-                                    $output .= '<p class="card-text">Clasificación: '.json_encode($array_clas[$i]).', Cantidad: '.json_encode($array_cant[$i]).'</p>';
-                                }*/
-                                $output .= '<a href="#" class="btn btn-xs btn-info edit-rev col-md-4 right" id="'. $row->id .'">Ver Detalles <i class="fas fa-eye"></i></a> </div>';
+                               for ($i = 0; $i < count($datos_rap); $i++) {
+                                    //$output .= '<p class="card-text">Clasificación: '.json_encode($array_clas[$i]).', Cantidad: '.json_encode($array_cant[$i]).'</p>';
+
+                                    $rev_rap = DB::table('revisions')
+                                        ->where('id', $array_rev_id[$i])
+                                        ->first();
+
+                                    $rev_lugar = DB::table('revisions')
+                                        ->where('lugar_id', $row->lugar_id)
+                                        ->first();
+
+                                    //obtener los datos del item para comparar con el de la revisión
+                                    $datos_item = Item::where('lugar_id', $row->lugar_id)->get();
+                                    foreach ($datos_item as $d_i) {
+                                        $cant_item = DB::table('items')
+                                            ->select(DB::raw('count(clasificacion) as clasi'))
+                                            ->where('clasificacion', '=', $d_i->clasificacion)
+                                            ->where('lugar_id', '=', $row->lugar_id)
+                                            ->get();
+
+
+                                        foreach ($cant_item as $c_i) {
+
+                                            if ($array_clas[$i] == $d_i->clasificacion) {
+
+                                                if ($array_cant[$i] == $c_i->clasi) {
+                                                    $anomalia_rev_no = "No";
+                                                }else{
+                                                   $anomalia_rev_si = "Si";
+                                                }
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                }
+
+                                if ($anomalia_rev_no == "No" && $anomalia_rev_si == "") {
+                                    $output .= '
+                                        <div class="card border-success mb-3 text-center">
+                                            <div class="card-header" id="title_header"><h4>Revisión: '. $row->tipo.' - Lugar: '. $lugar->nombre .'</h4>  </div>
+                                                <div class="card-body text-success">
+                                                <h4 class="card-title" id="title_body">Nombre del revisor: '. $revisor->nombre .' '.$revisor->apellido.'</h4>
+                                                <p class="card-text"> Momento: '.$row->momento.' - Observaciones: '.$row->observaciones.'</p>';
+                                    $output .= '<a href="#" class="btn btn-xs btn-success edit-rev col-md-4 right" id="'. $row->id .'">Ver Detalles <i class="fas fa-eye"></i></a> </div>';
+                                }else if($anomalia_rev_si == "Si" && $anomalia_rev_no == ""){
+                                    $output .= '
+                                        <div class="card border-danger mb-3 text-center">
+                                            <div class="card-header" id="title_header"><h4>Revisión: '. $row->tipo.' - Lugar: '. $lugar->nombre .'</h4>  </div>
+                                                <div class="card-body text-danger">
+                                                <h4 class="card-title" id="title_body">Nombre del revisor: '. $revisor->nombre .' '.$revisor->apellido.'</h4>
+                                                <p class="card-text"> Momento: '.$row->momento.' - Observaciones: '.$row->observaciones.'</p>';
+                                    $output .= '<a href="#" class="btn btn-xs btn-danger edit-rev col-md-4 right" id="'. $row->id .'">Ver Detalles <i class="fas fa-eye"></i></a> </div>';
+                                }else if($anomalia_rev_si == "Si" && $anomalia_rev_no == "No"){
+                                    $output .= '
+                                        <div class="card border-warning mb-3 text-center">
+                                            <div class="card-header" id="title_header"><h4>Revisión: '. $row->tipo.' - Lugar: '. $lugar->nombre .'</h4>  </div>
+                                                <div class="card-body text-warning">
+                                                <h4 class="card-title" id="title_body">Nombre del revisor: '. $revisor->nombre .' '.$revisor->apellido.'</h4>
+                                                <p class="card-text"> Momento: '.$row->momento.' - Observaciones: '.$row->observaciones.'</p>';
+                                        $output .= '<a href="#" class="btn btn-xs btn-warning edit-rev col-md-4 right" id="'. $row->id .'">Ver Detalles <i class="fas fa-eye"></i></a> </div>';
+                                }
+                            
                               if ($row->updated_at != '') {
                                 $up = \Carbon\Carbon::parse($row->created_at)->diffForHumans();
-                                $output .= '<div class="card-footer bg-transparent border-success">Actualizado: '.$up.'</div>
+                                $output .= '<div class="card-footer bg-transparent">Actualizado: '.$up.'</div>
                             </div>
                             ';
                                 }else{
-                                    $output .= '<div class="card-footer bg-transparent border-success">Actualizado: '.$row->updated_at.'</div>
+                                    $output .= '<div class="card-footer bg-transparent ">Actualizado: '.$row->updated_at.'</div>
                             </div>
                             ';
                                 }
@@ -512,14 +582,14 @@ class RevisionesController extends Controller
 
                 $output .= '
                 <div id="load_more">
-                    <button type="button" name="load_more_button" class="btn btn-success form-control" data-id="'.$last_id.'" id="load_more_button">Cargar Más</button>
+                    <button type="button" name="load_more_button" class="btn btn-primary form-control" data-id="'.$last_id.'" id="load_more_button">Cargar Más</button>
                 </div>
                 <br>
                 ';
             }else{
                 $output .= '
                 <div id="load_more">
-                    <button type="button" name="load_more_button" class="btn btn-info form-control">Sin datos</button>
+                    <button type="button" name="load_more_button" class="btn btn-primary form-control">Sin datos</button>
                 </div>
                 <br>
                 ';

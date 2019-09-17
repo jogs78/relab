@@ -52,7 +52,7 @@ class LoginController extends Controller
     {
         $id = Auth::id();
         $conectado = User::find($id);
-        $conectado->activo = '1';
+        $conectado->status = '1';
         $conectado->save();
         return redirect()->intended('/');
     }
@@ -96,7 +96,7 @@ class LoginController extends Controller
     {
         $id = $request->user_id;
         $desconectado = User::find($id);
-        $desconectado->activo = '0';
+        $desconectado->status = '0';
         $desconectado->save(); 
 
         return redirect()->intended('/login');

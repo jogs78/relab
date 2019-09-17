@@ -269,3 +269,4 @@ Stack trace:
 [20-Jun-2019 15:45:41 UTC] PHP Fatal error:  Cannot use [] for reading in /home/p9rw017z7ghv/public_html/ittg/isc/relab/app/Http/Controllers/MobiController.php on line 521
 [21-Jun-2019 16:44:15 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\Auth\LoginController::__construct() in /home/p9rw017z7ghv/public_html/ittg/isc/relab/app/Http/Controllers/Auth/LoginController.php on line 48
 [21-Jun-2019 16:44:27 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\Auth\LoginController::__construct() in /home/p9rw017z7ghv/public_html/ittg/isc/relab/app/Http/Controllers/Auth/LoginController.php on line 48
+[14-Sep-2019 15:54:15 UTC] PHP Warning:  Unterminated comment starting line 63 in /home/p9rw017z7ghv/public_html/ittg/isc/relab/app/Http/Controllers/RevisionesController.php on line 63

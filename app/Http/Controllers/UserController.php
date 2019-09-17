@@ -59,17 +59,15 @@ class UserController extends Controller
                 
                     return '<a href="#" class="btn btn-xs btn-info edit-user" id="'. $user->id .'"><i class="fas fa-user-edit"></i></a> <a href="#" class="btn btn-xs btn-danger delete-user" id="'. $user->id .'"><i class="fas fa-trash-alt"></i></a>';
                 
-                
             })
             ->addColumn('changeType', function($user){
                 
                     return '<a href="javascript:void(0)" class="btn btn-xs btn-success change-type" id="'. $user->id .'"><i class="fas fa-exchange-alt"></i></a>';
                 
-                
             })
             //->addColumn('checkbox', '<input type="checkbox" name="user_checkbox[]" class="user_checkbox" value="{{ $id }}">')
-            ->editColumn('activo', function($user){
-                if ($user->activo == 0) {
+            ->editColumn('status', function($user){
+                if ($user->status == 0) {
                     return 'Desconectado';
                 }else{
                     return 'Conectado';
@@ -153,6 +151,18 @@ class UserController extends Controller
         
     }
 
+    public function profile(Request $request){
+        return view('users.perfil');
+    }
+
+    public function getProfile(Request $request){
+        if ($request->ajax()) {
+            $id = $request->input('id');
+            $user = User::findOrFail($id);
+            return response()->json(['user' => $user]);
+        }
+    }
+
     public function fetchData(Request $request){
         if ($request->ajax()) {
             $id = $request->input('id');
@@ -202,6 +212,15 @@ class UserController extends Controller
 
             $image_name = Carbon::now()->second.rand() . '.' . $image->getClientOriginalExtension();
             \Storage::disk('local')->put($image_name, \File::get($image));
+            $user = User::find($request->input('user_id'));
+                $user->nombre = $request->input('nombre');
+                $user->apellido = $request->input('apellido');
+                $user->telefono = $request->input('telefono');
+                $user->email = $request->input('email');
+                $user->path = $image_name;
+                $user->numcontrol = $request->input('numcontrol');
+                $user->activo = $request->input('activo');
+                $user->save();
         }else{
             $rules = array(
                 'nombre' => 'required',
@@ -215,16 +234,15 @@ class UserController extends Controller
             if ($error->fails()) {
                 return response()->json(['errors' => $error->errors()->all()]);
             }
-        }
-
-        $user = User::find($request->input('user_id'));
+            $user = User::find($request->input('user_id'));
                 $user->nombre = $request->input('nombre');
                 $user->apellido = $request->input('apellido');
                 $user->telefono = $request->input('telefono');
                 $user->email = $request->input('email');
-                $user->path = $image_name;
                 $user->numcontrol = $request->input('numcontrol');
+                $user->activo = $request->input('activo');
                 $user->save();
+        }
 
         return response()->json(['success' => 'Usuario Actualizado Correctamente']);
     }
@@ -253,7 +271,7 @@ class UserController extends Controller
 //Function to see all conected users
     public function conectedUsers(){
         $output = '';
-        $users = User::where('activo',1)->get();
+        $users = User::where('status',1)->get();
         
         return response()->json($users);
         

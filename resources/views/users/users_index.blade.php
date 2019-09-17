@@ -13,7 +13,28 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">    
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+  <style type="text/css" media="screen">
+        .table-users tbody tr{
+          cursor: pointer;
+        }
+        .circulo{
+             width: 40px;
+     height: 40px;
+     -moz-border-radius: 50%;
+     -webkit-border-radius: 50%;
+     border-radius: 50%;
+     background: #33ff36;
+        }
+        .circulono{
+           width: 40px;
+     height: 40px;
+     -moz-border-radius: 50%;
+     -webkit-border-radius: 50%;
+     border-radius: 50%;
+     background: #ff3333;
+        }
+      </style>    
 
 @endsection
 
@@ -80,17 +101,13 @@
   </div>
   <br>
     <div class="table-responsive">
-        <table id="users_table" class="table table-striped table-bordered" width="100%">
+        <table id="users_table" class="table table-borderless table-hover text-centered" width="100%">
           <thead>
             <tr>
               <th>Foto</th>
               <th>Nombre</th>
               <th>Apellido</th>
-              <th>Teléfono</th>
-              <th>Tipo de Usuario</th>
-              <th>Email</th>
-              <th>Num. de Control</th>
-              <th>Estado</th>
+              <th>Conectado</th>
               <th>Modificado</th>
               @if(Auth::user()->tipo_usuario == 'Jefe')
               <th>Cambiar Tipo</th>
@@ -101,10 +118,69 @@
               {{--<th><button type="button" class="btn btn-danger btn-xs" name="bulk_delete" id="bulk_delete_user"><i class="fas fa-user-times"></i></button></th>--}}
             </tr>
           </thead>
+          <tbody></tbody>
         </table>
     </div>   
       
-    
+
+<!-- Modal -->
+    <div class="modal fade bd-example-modal-lg" id="myModalProfile" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title" id="myModalLabel"></h4>
+                    </div>
+                <div class="modal-body">
+                    <center>
+                      <div id="fotoPerfil" class="container">
+                        
+                      </div>
+                    </a>
+                    <h3 class="media-heading" id="nombrePerfil"></h3>
+                    <span class="label label-success"><strong id="estadoPerfil"></strong></span>
+                    </center>
+                    <hr>
+                    <center>
+                    <div class="container-fluid">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <label for="telefono">Teléfono: </label>
+                          <span class="label label-warning"><strong  id="telePerfil"> </strong></span>
+                        </div>
+                        <div class="col-md-6 ml-auto">
+                          <label for="email">Email: </label>
+                          <span class="label label-info"> <strong id="emailPerfil"></strong></span></div>
+                      </div>
+                      <div class="row">
+                          
+                            <div class="col-md-4">
+                              <label for="numcontrol">Número de Control: </label>
+                              <span class="label label-info"><strong id="numPerfil"></strong></span>
+                            </div>
+                            <div class="col-md-4">
+                              <label for="activo">Activo? </label>
+                              <span class="label label-info"><strong id="userActivo"></strong></span>
+                            </div>
+                            <div class="col-md-4 ml-auto">
+                              <label for="tipouser">Tipo de Usuario: </label>
+                              <span class="label label-info"><strong id="tuserPerfil"></strong></span>
+                            </div>
+                          
+                        </div>
+                      </div>
+                    
+                    </center>
+                </div>
+                <div class="modal-footer">
+                    <center>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 {{-- Form CReate User --}}
@@ -283,13 +359,20 @@
           </div>
           <div class="form-group">
             <label for="last_name">Foto</label>
-            <input type="text" class="form-control" name="path" id="path_edit" disabled>
             <input type="file" name="path_file" id="path_edit_file">
             <span id="store_image_edit"></span>
           </div>
           <div class="form-group">
             <label for="last_name">Número de Control</label>
             <input type="text" class="form-control" name="numcontrol" id="numcontrol_edit">
+          </div>
+          <div class="form-group">
+            <label for="last_name">Esta Activo</label>
+            <input type="text" id="activo_dis" class="form-control" disabled>
+            <input type="hidden" name="activo" id="activo_edit">
+            <div class="form-group" id="select_activo">
+              
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -406,12 +489,14 @@
   function infoUserFoto(){
     $("#modalTitleInfo").text("Indicaciones!");
       $("#modalTitleInfo").addClass("text-success");
-      $("#msj_information_modal").text("Para un mejor control, se les solicita poner una foto de perfil. Gracias!");
+      $("#msj_information_modal").text("Para un mejor control y/o reconocimiento, se les solicita poner una foto de perfil. Gracias!");
       $("#msj_information_modal").addClass("text-success");
       $("#informationModal").modal('show');
   }
 
-            $('#users_table').DataTable({
+  
+
+            var table = $('#users_table').DataTable({
                 "processing": true,
                 "serverSide": true,
                 "ajax": "{{ route('users.getdata') }}",
@@ -426,11 +511,16 @@
                     },
                     {data: 'nombre'},
                     {data: 'apellido'},
-                    {data: 'telefono'},
-                    {data: 'tipo_usuario'},
-                    {data: 'email'},
-                    {data: 'numcontrol'},
-                    {data: 'activo'},
+                    {data: 'status', render: function(data, type, full, meta){
+                      var circulo = `<div class="circulo"></div>`;
+                      var circulono = `<div class="circulono"></div>`;
+                      if (data == 'Conectado') {
+                        return circulo;
+                      }else{
+                        return circulono;
+                      }
+                      },
+                      orderable:false, searchable:false,},
                     {data: 'updated_at'},
                     @if(Auth::user()->tipo_usuario == 'Jefe')
                     { "data" : "changeType",
@@ -468,6 +558,52 @@
                     "infoFiltered": ""
                 }
             });
+
+    $('#users_table').on('click','td', function () {
+          var col = $(this).parent().children().index($(this));
+          num_column = col;
+    });
+
+
+    $('#users_table').on('click', 'tr', function () {
+      if (num_column <= 4) {
+        $("#users_table tr").attr("title", "Ver Perfil");
+        $("#users_table tr").css('cursor', 'pointer');
+        var data1 = table.row( this ).data();
+        var id = data1.id
+
+        $.ajax({
+          url: "{{ route('users.getProfile') }}",
+          method: "GET",
+          data: {id: id},
+          dataType: "json",
+          success:function(data){
+            $("#myModalLabel").text('Perfil de '+data.user.nombre);
+            $("#fotoPerfil").html('<img src="{{ URL::to('/') }}/imguser/'+data.user.path+'" name="aboutme" width="140" height="140" border="0" class="img-circle">');
+            $("#nombrePerfil").text(data.user.nombre+' '+data.user.apellido);
+            $("#tuserPerfil").text(data.user.tipo_usuario);
+            $("#telePerfil").text(data.user.telefono);
+            $("#emailPerfil").text(data.user.email);
+            $("#numPerfil").text(data.user.numcontrol);
+            if (data.user.activo == 1) {
+              $("#userActivo").text('Si');
+            }else{
+              $("#userActivo").text('No');
+            }
+            if (data.user.status == 1) {
+              $("#estadoPerfil").text('Conectado');
+              $("#estadoPerfil").css('color','#33ff36');
+            }else{
+              $("#estadoPerfil").text('Desconectado');
+              $("#estadoPerfil").css('color','#ff3333');
+            }
+
+          }
+
+          });
+        $("#myModalProfile").modal('show');
+      }
+    });
 
 
     //Function to create a new place
@@ -527,25 +663,51 @@
           $("#telefono_edit").val(html.data.telefono);
           $("#tipo_usuario_edit").val(html.data.tipo_usuario);
           $("#email_edit").val(html.data.email);
-          $("#path_edit").val(html.data.path);
+          //$("#path_edit").val(html.data.path);
           $("#store_image_edit").html('<img src="{{ URL::to('/') }}/imguser/'+html.data.path+'" width="70" class="img-thumbnail">');
-          //$("#store_image").append('<input type="hidden" name="hidden_image" value="'+html.data.path+'" />');
           $("#numcontrol_edit").val(html.data.numcontrol);
+          if (html.data.activo == 1) {
+            $("#activo_dis").val('Si');
+            $("#select_activo").html(`<select class="form-control" id="activo_sel">
+              <option value="1">Si</option>
+              <option value="0">No</option>
+            </select>`);
+          }else{
+            $("#activo_dis").val('No');
+            $("#select_activo").html(`<select class="form-control" id="activo_sel">
+              <option value="0">No</option>
+              <option value="1">Si</option>
+            </select>`);
+          }
           $("#user_id_edit").val(html.data.id);
           $("#userEditModal").modal('show');
           $("#action").val('Editar');
           $(".modal-title").text('Editar Usuario');
           $("#button_action").val('update_user');
+
+          $("#activo_sel").on('change', function(){
+            if ($("#activo_sel").val() == 1) {
+              $("#activo_dis").val('Si');
+              $("#activo_edit").val(1);
+              console.log(1);
+            }else{
+              $("#activo_dis").val('No');
+              $("#activo_edit").val(0);
+              console.log(0);
+            }
+          });
         }
       });
+
+      
       
     });
 
     $('#user_form_edit').on('submit', function(event){
         event.preventDefault();
-
+        
         $.ajax({
-            url: "/users/update",{{--"{{ route('ajax-crud.update') }}",--}}
+            url: "/users/update",
             method: "post",
             data: new FormData(this),
             contentType: false,
@@ -557,9 +719,16 @@
               if (data.errors) {
                 html = '<div class="alert alert-danger">';
                 for (var i = 0; i < data.errors.length; i++) {
-                  html += '<p>'+ data.errors[i] +'</p>'
+                  html += '<p>'+ data.errors[i] +'</p>'                  
                 }
                 html += '</div>';
+                $("#modalTitleInfo").addClass("text-danger");
+                $("#msj_information_modal").addClass("text-danger");
+                $("#msj_information_modal").text(
+                  data.errors
+                  );
+                $("#modalTitleInfo").text('Error al actualizar');
+                $("#informationModal").modal('show');
               }
               if (data.success) {
                 html = '<div class="alert alert-success">'+ data.success +'</div>';
@@ -567,9 +736,13 @@
                 $("#store_image").html('');
                 $("#form_result1").html(html); 
                 $("#userEditModal").modal('hide');
+                $("#modalTitleInfo").addClass("text-success");
+                $("#msj_information_modal").addClass("text-success");
+                $("#msj_information_modal").text('Usuario Actulizado Correctamente');
+                $("#modalTitleInfo").text('Genial!');
+                $("#informationModal").modal('show');
               }
               $("#users_table").DataTable().ajax.reload();
-              alert('Usuario Actulizado Correctamente');
             }
           });
 
